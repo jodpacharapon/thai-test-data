@@ -2,134 +2,397 @@
 <html lang="th">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Thai Test Data</title>
 <meta name="description" content="สร้างข้อมูลทดสอบภาษาไทยที่ valid จริง: เลขบัตรประชาชน เบอร์มือถือ ชื่อ ที่อยู่ วันที่ พ.ศ.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;600&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+  /* Layout: sticky toolbar nav → compact hero holding the search → card grid, then stacked tool panels. */
   :root {
-    --bg: #f7f7f5; --surface: #fff; --text: #1d1d1b; --muted: #6b6b66;
-    --border: #e2e2dc; --accent: #0f6e56; --accent-text: #fff; --ok: #0f6e56; --bad: #b42318;
+    --bg: #f4f6f8; --surface: #ffffff; --sunken: #eef1f4; --text: #141a22; --muted: #5b6573;
+    --line: #dde2e8; --accent: #0b7a5a; --accent-soft: #e2f3ec; --accent-text: #ffffff;
+    --ok: #0b7a5a; --bad: #b42318; --bad-soft: #fdecea; --nav-bg: rgba(244, 246, 248, 0.85);
+    --font-display: "Bai Jamjuree", "IBM Plex Sans Thai", system-ui, sans-serif;
+    --font-body: "IBM Plex Sans Thai", system-ui, sans-serif;
+    --font-mono: "IBM Plex Mono", "IBM Plex Sans Thai", ui-monospace, monospace;
+    --radius: 10px;
   }
   @media (prefers-color-scheme: dark) {
-    :root { --bg: #151514; --surface: #1f1f1d; --text: #ececea; --muted: #a0a09a;
-      --border: #33332f; --accent: #3fb68b; --accent-text: #0b0b0a; --ok: #3fb68b; --bad: #f97066; }
+    :root:not([data-theme="light"]) {
+      --bg: #0f1318; --surface: #171c23; --sunken: #11161c; --text: #e7ebf0; --muted: #9aa4b2;
+      --line: #2a313b; --accent: #3cc497; --accent-soft: #143329; --accent-text: #06120d;
+      --ok: #3cc497; --bad: #f97066; --bad-soft: #3a1714; --nav-bg: rgba(15, 19, 24, 0.85); color-scheme: dark;
+    }
   }
+  :root[data-theme="dark"] {
+    --bg: #0f1318; --surface: #171c23; --sunken: #11161c; --text: #e7ebf0; --muted: #9aa4b2;
+    --line: #2a313b; --accent: #3cc497; --accent-soft: #143329; --accent-text: #06120d;
+    --ok: #3cc497; --bad: #f97066; --bad-soft: #3a1714; --nav-bg: rgba(15, 19, 24, 0.85); color-scheme: dark;
+  }
+  :root[data-theme="light"] { color-scheme: light; }
+
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text);
-    font: 16px/1.6 "IBM Plex Sans Thai", system-ui, sans-serif; }
-  main { max-width: 960px; margin: 0 auto; padding: 40px 16px 64px; }
-  h1 { font-size: 2rem; margin: 0 0 4px; }
-  .lead { color: var(--muted); margin: 0 0 24px; }
-  .lead a { color: var(--accent); }
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
-  h2 { font-size: 1.1rem; margin: 0 0 12px; }
-  .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-  select, input, button { font: inherit; border-radius: 8px; border: 1px solid var(--border);
-    background: var(--surface); color: var(--text); padding: 8px 12px; }
-  input[type=number] { width: 80px; }
-  button { cursor: pointer; }
-  button.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 600; }
-  label { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); }
-  .table-wrap { overflow-x: auto; margin-top: 16px; }
-  table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
-  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
-  th { color: var(--muted); font-weight: 600; }
-  td.mono, .mono { font-family: "IBM Plex Mono", monospace; }
-  .validator { display: flex; gap: 8px; flex-wrap: wrap; }
-  .validator input { flex: 1; min-width: 200px; font-family: "IBM Plex Mono", monospace; }
-  .result { margin-top: 8px; font-weight: 600; min-height: 1.6em; }
-  .result.ok { color: var(--ok); } .result.bad { color: var(--bad); }
-  pre { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; overflow-x: auto; font-size: 0.85rem; margin: 0; }
-  .search { width: 100%; font-size: 1.05rem; padding: 12px 14px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin-top: 16px; }
-  .item { border: 1px solid var(--border); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 8px; background: var(--bg); }
-  .item[hidden] { display: none; }
-  .item h3 { font-size: 0.95rem; margin: 0; }
-  .item .value { font-family: "IBM Plex Mono", "IBM Plex Sans Thai", monospace; font-size: 0.95rem; word-break: break-word; min-height: 1.6em; }
-  .item .actions { display: flex; gap: 6px; margin-top: auto; }
-  .item .actions button { padding: 4px 10px; font-size: 0.85rem; }
-  .empty { color: var(--muted); margin-top: 12px; }
-  .note { color: var(--muted); font-size: 0.85rem; text-align: center; margin-top: 24px; }
-  .toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg);
-    padding: 8px 16px; border-radius: 8px; opacity: 0; transition: opacity .2s; pointer-events: none; }
-  .toast.show { opacity: 1; }
+  [hidden] { display: none !important; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.65 var(--font-body); }
+  a { color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .wrap { max-width: 1080px; margin: 0 auto;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+  /* Nav */
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--nav-bg); }
+  .nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--nav-bg);
+    backdrop-filter: saturate(1.4) blur(10px); -webkit-backdrop-filter: saturate(1.4) blur(10px); border-bottom: 1px solid var(--line); }
+  .nav .wrap { display: flex; align-items: center; gap: 16px; height: 60px; }
+  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text);
+    font: 700 1.1rem/1 var(--font-display); white-space: nowrap; }
+  .brand svg { flex: none; }
+  .brand small { font: 500 0.7rem/1 var(--font-mono); color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 3px 7px; }
+  .links { display: flex; gap: 2px; margin-left: 8px; }
+  .links a { color: var(--muted); text-decoration: none; font-size: 0.92rem; padding: 6px 12px; border-radius: 8px; }
+  .links a:hover { color: var(--text); background: var(--sunken); }
+  .links a.active { color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+  .nav-actions { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+  .icon-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 36px; min-width: 36px; padding: 0 10px;
+    border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--text);
+    font: 500 0.88rem var(--font-body); text-decoration: none; cursor: pointer; }
+  .icon-btn:hover { border-color: var(--muted); }
+  .menu-btn { display: none; }
+  @media (max-width: 760px) {
+    .menu-btn { display: inline-flex; }
+    .gh-label { display: none; }
+    .links { position: absolute; top: 60px; left: 0; right: 0; margin: 0; flex-direction: column; gap: 0;
+      background: var(--surface); border-bottom: 1px solid var(--line);
+      padding: 8px max(16px, env(safe-area-inset-right, 0px)) 12px max(16px, env(safe-area-inset-left, 0px)); }
+    .links:not(.open) { display: none; }
+    .links a { padding: 10px 12px; }
+  }
+
+  /* Hero */
+  .hero { padding-block: 48px 8px; }
+  .eyebrow { font: 500 0.8rem var(--font-mono); color: var(--accent); letter-spacing: 0.04em; margin: 0 0 10px; }
+  h1 { font: 700 clamp(1.9rem, 4.5vw, 2.8rem)/1.2 var(--font-display); margin: 0 0 12px; text-wrap: balance; max-width: 22ch; }
+  .lead { color: var(--muted); margin: 0 0 24px; max-width: 60ch; }
+  .facts { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 28px; padding: 0; list-style: none; }
+  .facts li { font-size: 0.85rem; color: var(--muted); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; }
+  .facts b { color: var(--text); font-weight: 600; }
+  .search-box { position: relative; }
+  .search-box svg { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+  .search { width: 100%; font: 1.05rem var(--font-body); padding: 14px 16px 14px 46px; border-radius: 12px;
+    border: 1px solid var(--line); background: var(--surface); color: var(--text); }
+  .search:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .chips { display: flex; gap: 8px; overflow-x: auto; padding: 14px 0 4px; scrollbar-width: none; }
+  .chip { flex: none; font: 500 0.88rem var(--font-body); padding: 6px 14px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--surface); color: var(--muted); }
+  .chip[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .chip .n { font-family: var(--font-mono); font-size: 0.75rem; opacity: 0.7; margin-left: 4px; }
+
+  /* Catalog */
+  section { scroll-margin-top: calc(72px + env(safe-area-inset-top, 0px)); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; padding-block: 16px 8px; }
+  .item { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px;
+    display: flex; flex-direction: column; gap: 10px; min-width: 0; transition: border-color .15s; }
+  .item:hover { border-color: var(--muted); }
+  .item-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .item h3 { font: 600 0.95rem/1.4 var(--font-body); margin: 0; }
+  .tag { flex: none; font: 500 0.7rem var(--font-mono); color: var(--muted); }
+  .tag.neg { color: var(--bad); }
+  .value { font: 0.95rem/1.5 var(--font-mono); background: var(--sunken); border-radius: 6px; padding: 8px 10px;
+    min-height: 2.6em; overflow-x: auto; word-break: break-word; font-variant-numeric: tabular-nums; }
+  .value.json { white-space: pre; font-size: 0.78rem; max-height: 180px; overflow-y: auto; word-break: normal; }
+  .actions { display: flex; gap: 6px; margin-top: auto; }
+  .btn { font: 500 0.85rem var(--font-body); padding: 6px 12px; border-radius: 8px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--surface); color: var(--text); }
+  .btn:hover { border-color: var(--muted); }
+  .btn.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 600; }
+  .empty { color: var(--muted); padding: 24px 0; }
+
+  /* Panels */
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 24px; margin-top: 40px; }
+  h2 { font: 700 1.35rem/1.3 var(--font-display); margin: 0 0 4px; }
+  .panel > p { color: var(--muted); margin: 0 0 18px; }
+  .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+  .field { display: flex; flex-direction: column; gap: 4px; font-size: 0.8rem; color: var(--muted); }
+  select, .field input, .validator input { font: 0.95rem var(--font-body); border-radius: 8px; border: 1px solid var(--line);
+    background: var(--bg); color: var(--text); padding: 8px 12px; height: 40px; }
+  .field input[type=number] { width: 96px; font-family: var(--font-mono); }
+  .controls .btn { height: 40px; }
+  .table-wrap { overflow-x: auto; margin-top: 18px; border: 1px solid var(--line); border-radius: var(--radius); }
+  table { border-collapse: collapse; width: 100%; font-size: 0.88rem; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  tr:last-child td { border-bottom: 0; }
+  th { color: var(--muted); font-weight: 600; background: var(--sunken); position: sticky; top: 0; }
+  td.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+  .validator { display: flex; gap: 8px; }
+  .validator input { flex: 1; min-width: 0; font-family: var(--font-mono); font-size: 1.05rem; height: 48px; letter-spacing: 0.04em; }
+  .result { margin-top: 12px; min-height: 2.4em; display: flex; align-items: center; gap: 8px; font-weight: 600; }
+  .result .pill { padding: 4px 12px; border-radius: 999px; font-size: 0.9rem; }
+  .result.ok .pill { background: var(--accent-soft); color: var(--ok); }
+  .result.bad .pill { background: var(--bad-soft); color: var(--bad); }
+  .result small { color: var(--muted); font-weight: 400; font-family: var(--font-mono); }
+  pre { background: var(--sunken); border-radius: var(--radius); padding: 16px; overflow-x: auto; font: 0.85rem/1.6 var(--font-mono); margin: 0; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .two > * { min-width: 0; }
+  @media (max-width: 860px) { .two { grid-template-columns: 1fr; } }
+  .two .panel { margin-top: 40px; }
+
+  footer { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--line); margin-top: 56px; padding-block: 24px calc(24px + env(safe-area-inset-bottom, 0px)); }
+  footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+  footer p { margin: 0; max-width: 64ch; }
+
+  .toast { position: fixed; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translate(-50%, 8px); z-index: 40;
+    background: var(--text); color: var(--bg); padding: 8px 16px; border-radius: 8px; font-size: 0.9rem;
+    opacity: 0; transition: opacity .2s, transform .2s; pointer-events: none; }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
 </style>
 </head>
 <body>
-<main>
-  <h1>Thai Test Data 🇹🇭</h1>
-  <p class="lead">สร้างข้อมูลทดสอบภาษาไทยที่ผ่าน validation ได้จริง สำหรับ Automation Test ·
-    <a href="https://github.com/jodpacharapon/thai-test-data">GitHub</a></p>
+<nav class="nav" aria-label="เมนูหลัก">
+  <div class="wrap">
+    <a class="brand" href="#search">
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
+        <rect x="1" y="5" width="26" height="18" rx="4" fill="var(--accent)"/>
+        <circle cx="9" cy="13" r="3" fill="var(--accent-text)"/>
+        <rect x="6" y="17.5" width="6" height="2" rx="1" fill="var(--accent-text)"/>
+        <rect x="15" y="10" width="9" height="2" rx="1" fill="var(--accent-text)"/>
+        <rect x="15" y="14" width="6" height="2" rx="1" fill="var(--accent-text)" opacity=".7"/>
+      </svg>
+      Thai Test Data <small>v0.1</small>
+    </a>
+    <div class="links" id="links">
+      <a href="#search">ค้นหาข้อมูล</a>
+      <a href="#bulk">สร้างหลายรายการ</a>
+      <a href="#validate">ตรวจเลขบัตร</a>
+      <a href="#code">ใช้ในโค้ด</a>
+    </div>
+    <div class="nav-actions">
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="สลับธีมสว่าง/มืด" title="สลับธีม">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+      <a class="icon-btn" href="https://github.com/jodpacharapon/thai-test-data" target="_blank" rel="noopener">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.08-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.82 1.19 3.08 0 4.41-2.69 5.39-5.25 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg>
+        <span class="gh-label">GitHub</span>
+      </a>
+      <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="เปิดเมนู" aria-expanded="false" aria-controls="links">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
 
-  <section class="card">
-    <h2>ค้นหาข้อมูลที่ต้องการ</h2>
-    <input id="search" class="search" type="search" placeholder="พิมพ์ค้นหา เช่น บัตรประชาชน, เบอร์, ที่อยู่, zip, email…" aria-label="ค้นหาชนิดข้อมูล">
+<main class="wrap">
+  <section id="search" class="hero">
+    <p class="eyebrow">TEST DATA GENERATOR · ภาษาไทย</p>
+    <h1>ข้อมูลทดสอบภาษาไทย<br>ที่ผ่าน validation จริง</h1>
+    <p class="lead">เลขบัตรประชาชนที่ check digit ถูกต้อง เบอร์มือถือ ชื่อ ที่อยู่ และวันที่ พ.ศ. ค้นหาแล้วกดคัดลอกไปวางในฟอร์มได้เลย</p>
+    <ul class="facts">
+      <li><b id="kindCount">15</b> ชนิดข้อมูล</li>
+      <li>สุ่ม<b>ในเบราว์เซอร์</b> ไม่ส่งข้อมูลออก</li>
+      <li>มี <b>library</b> สำหรับ Automation</li>
+    </ul>
+    <div class="search-box">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" class="search" type="search" placeholder="ค้นหา เช่น บัตรประชาชน, เบอร์, zip, email…" aria-label="ค้นหาชนิดข้อมูล" autocomplete="off">
+    </div>
+    <div class="chips" id="chips" role="group" aria-label="กรองตามหมวด"></div>
     <div id="grid" class="grid"></div>
-    <p id="empty" class="empty" hidden>ไม่พบข้อมูลที่ค้นหา อยากให้มีเพิ่ม? <a href="https://github.com/jodpacharapon/thai-test-data/issues">เปิด issue</a> ได้เลย</p>
+    <p id="empty" class="empty" hidden>ไม่พบข้อมูลที่ค้นหา อยากให้มีเพิ่ม? <a href="https://github.com/jodpacharapon/thai-test-data/issues" target="_blank" rel="noopener">เปิด issue บน GitHub</a></p>
   </section>
 
-  <section class="card">
-    <h2>สร้างข้อมูลทีละหลายรายการ</h2>
+  <section id="bulk" class="panel">
+    <h2>สร้างหลายรายการ</h2>
+    <p>สร้างครั้งละหลายแถวสำหรับเตรียม test data ใส่ seed เดิมจะได้ข้อมูลชุดเดิมทุกครั้ง</p>
     <div class="controls">
-      <select id="kind" aria-label="ชนิดข้อมูล">
-        <option value="person">บุคคล (ครบชุด)</option>
-        <option value="citizenId">เลขบัตรประชาชน (valid)</option>
-        <option value="invalidCitizenId">เลขบัตรประชาชน (invalid, ใช้เทส negative)</option>
-        <option value="juristicId">เลขผู้เสียภาษีนิติบุคคล</option>
-        <option value="phone">เบอร์มือถือ</option>
-        <option value="address">ที่อยู่</option>
-      </select>
-      <label>จำนวน <input id="count" type="number" min="1" max="500" value="5"></label>
-      <label>Seed <input id="seed" type="number" placeholder="สุ่ม"></label>
-      <button class="primary" id="gen">สร้าง</button>
-      <button id="copyJson">คัดลอก JSON</button>
-      <button id="dlCsv">ดาวน์โหลด CSV</button>
+      <label class="field">ชนิดข้อมูล
+        <select id="kind">
+          <option value="person">บุคคล (ครบชุด)</option>
+          <option value="citizenId">เลขบัตรประชาชน (valid)</option>
+          <option value="invalidCitizenId">เลขบัตรประชาชน (invalid)</option>
+          <option value="juristicId">เลขผู้เสียภาษีนิติบุคคล</option>
+          <option value="phone">เบอร์มือถือ</option>
+          <option value="address">ที่อยู่</option>
+        </select>
+      </label>
+      <label class="field">จำนวน <input id="count" type="number" min="1" max="500" value="5"></label>
+      <label class="field">Seed <input id="seed" type="number" placeholder="สุ่ม"></label>
+      <button class="btn primary" id="gen" type="button">สร้าง</button>
+      <button class="btn" id="copyJson" type="button">คัดลอก JSON</button>
+      <button class="btn" id="dlCsv" type="button">ดาวน์โหลด CSV</button>
     </div>
     <div class="table-wrap"><table id="out"></table></div>
   </section>
 
-  <section class="card">
-    <h2>ตรวจเลขบัตรประชาชน / เลขผู้เสียภาษี</h2>
-    <div class="validator">
-      <input id="idInput" placeholder="เช่น 1-2345-67890-12-1" inputmode="numeric">
-    </div>
-    <div id="idResult" class="result" aria-live="polite"></div>
-  </section>
+  <div class="two">
+    <section id="validate" class="panel">
+      <h2>ตรวจเลขบัตร</h2>
+      <p>ใช้ได้ทั้งเลขบัตรประชาชนและเลขผู้เสียภาษี 13 หลัก จะพิมพ์ขีดหรือไม่ก็ได้</p>
+      <div class="validator">
+        <input id="idInput" placeholder="1-2345-67890-12-1" inputmode="numeric" aria-label="เลข 13 หลัก">
+      </div>
+      <div id="idResult" class="result" aria-live="polite"></div>
+    </section>
 
-  <section class="card">
-    <h2>ใช้ในโค้ดเทส</h2>
+    <section id="code" class="panel">
+      <h2>ใช้ในโค้ดเทส</h2>
+      <p>ติดตั้งแล้วใช้กับ Playwright, Cypress หรือ Jest ได้ทันที</p>
 <pre><code>npm install thai-test-data
 
-import { createThaiData, isValidThaiId } from "thai-test-data";
+import { createThaiData } from "thai-test-data";
 
-const td = createThaiData({ seed: 42 }); // seed เดิม = ข้อมูลเดิม
+const td = createThaiData({ seed: 42 });
 const user = td.person();
 
 await page.fill("#citizenId", user.citizenId);
-await page.fill("#phone", user.phone);
-await page.fill("#address", user.address.fullAddress);</code></pre>
-  </section>
-  <p class="note">ข้อมูลทั้งหมดสุ่มขึ้นในเบราว์เซอร์ของคุณ ไม่มีการส่งหรือเก็บไว้ที่ใด ใช้เพื่อการทดสอบระบบเท่านั้น<br>
-    เลขที่สุ่มอาจบังเอิญตรงกับบุคคลจริงได้ ห้ามนำไปใช้สมัครบริการจริงหรือแอบอ้างตัวตน</p>
+await page.fill("#phone", user.phone);</code></pre>
+    </section>
+  </div>
 </main>
-<div class="toast" id="toast"></div>
+
+<footer>
+  <div class="wrap">
+    <p>ข้อมูลทั้งหมดสุ่มขึ้นในเบราว์เซอร์ของคุณ ไม่มีการส่งหรือเก็บไว้ที่ใด ใช้เพื่อทดสอบระบบเท่านั้น เลขที่สุ่มอาจบังเอิญตรงกับบุคคลจริงได้ ห้ามนำไปใช้สมัครบริการจริงหรือแอบอ้างตัวตน</p>
+    <p>MIT License · <a href="https://github.com/jodpacharapon/thai-test-data" target="_blank" rel="noopener">GitHub</a></p>
+  </div>
+</footer>
+<div class="toast" id="toast" role="status"></div>
 
 <script type="module">
   import { createThaiData, isValidThaiId, formatThaiId, formatPhone, toE164 } from "./lib/index.js";
 
   const $ = (id) => document.getElementById(id);
-  let rows = [];
 
+  function toast(msg) {
+    const t = $("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => t.classList.remove("show"), 1500);
+  }
+
+  async function copy(text, done = "คัดลอกแล้ว") {
+    try { await navigator.clipboard.writeText(text); toast(done); }
+    catch { toast("คัดลอกไม่สำเร็จ ลองเลือกข้อความแล้วกด Ctrl+C"); }
+  }
+
+  // Theme toggle: remembers the choice when storage is available.
+  const root = document.documentElement;
+  try { const saved = localStorage.getItem("theme"); if (saved) root.dataset.theme = saved; } catch {}
+  $("themeBtn").addEventListener("click", () => {
+    const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    root.dataset.theme = dark ? "light" : "dark";
+    try { localStorage.setItem("theme", root.dataset.theme); } catch {}
+  });
+
+  // Mobile menu
+  const links = $("links");
+  $("menuBtn").addEventListener("click", () => {
+    const open = links.classList.toggle("open");
+    $("menuBtn").setAttribute("aria-expanded", String(open));
+  });
+  links.addEventListener("click", (e) => {
+    if (e.target.closest("a")) { links.classList.remove("open"); $("menuBtn").setAttribute("aria-expanded", "false"); }
+  });
+
+  // Highlight the nav link for the section in view.
+  const navLinks = [...links.querySelectorAll("a")];
+  // The last section whose top has passed the nav wins; side-by-side sections tie, so the first of them is kept.
+  const sections = ["search", "bulk", "validate", "code"].map((id) => $(id));
+  let clickedId = null;
+  function markActive() {
+    let current = sections[0];
+    for (const sec of sections) if (sec.getBoundingClientRect().top <= 120 && sec.getBoundingClientRect().top > current.getBoundingClientRect().top) current = sec;
+    // After a nav click, keep the clicked section highlighted while it is on screen (until the user scrolls by hand).
+    if (clickedId) { const top = $(clickedId).getBoundingClientRect().top; if (top >= 0 && top < innerHeight) current = $(clickedId); }
+    navLinks.forEach((a) => a.classList.toggle("active", a.getAttribute("href") === "#" + current.id));
+  }
+  navLinks.forEach((a) => a.addEventListener("click", () => { clickedId = a.getAttribute("href").slice(1); requestAnimationFrame(markActive); }));
+  addEventListener("scroll", () => requestAnimationFrame(markActive), { passive: true });
+  addEventListener("wheel", () => { clickedId = null; }, { passive: true });
+  addEventListener("touchmove", () => { clickedId = null; }, { passive: true });
+  markActive();
+
+  // Catalog: each entry is one kind of value a tester may need.
+  const quick = createThaiData();
+  const CATEGORIES = { id: "บัตรและภาษี", phone: "เบอร์โทร", name: "ชื่อและอีเมล", address: "ที่อยู่", date: "วันที่", person: "ครบชุด" };
+  const CATALOG = [
+    { cat: "id", title: "เลขบัตรประชาชน", keys: "citizen id national เลขบัตร 13 หลัก valid", gen: () => quick.citizenId() },
+    { cat: "id", title: "เลขบัตรประชาชน แบบมีขีด", keys: "citizen id format dash ขีด", gen: () => formatThaiId(quick.citizenId()) },
+    { cat: "id", title: "เลขบัตรประชาชน ที่ผิด", keys: "citizen id invalid negative ผิด", gen: () => quick.invalidCitizenId(), negative: true },
+    { cat: "id", title: "เลขผู้เสียภาษีนิติบุคคล", keys: "นิติบุคคล บริษัท ภาษี tax juristic company", gen: () => quick.juristicId() },
+    { cat: "phone", title: "เบอร์มือถือ", keys: "โทรศัพท์ มือถือ phone mobile tel", gen: () => quick.phone() },
+    { cat: "phone", title: "เบอร์มือถือ แบบมีขีด", keys: "โทรศัพท์ มือถือ phone mobile format dash", gen: () => formatPhone(quick.phone()) },
+    { cat: "phone", title: "เบอร์มือถือ +66", keys: "โทรศัพท์ phone e164 international", gen: () => toE164(quick.phone()) },
+    { cat: "name", title: "ชื่อ-นามสกุล ภาษาไทย", keys: "ชื่อ นามสกุล name thai", gen: () => quick.name().fullNameTh },
+    { cat: "name", title: "ชื่อ-นามสกุล ภาษาอังกฤษ", keys: "ชื่อ นามสกุล name english", gen: () => quick.name().fullNameEn },
+    { cat: "name", title: "อีเมล", keys: "email mail", gen: () => quick.person().email },
+    { cat: "address", title: "ที่อยู่เต็ม", keys: "address บ้าน", gen: () => quick.address().fullAddress },
+    { cat: "address", title: "จังหวัดและรหัสไปรษณีย์", keys: "province zip postal code", gen: () => { const a = quick.address(); return `${a.province} ${a.postalCode}`; } },
+    { cat: "date", title: "วันเกิด พ.ศ.", keys: "birth date buddhist", gen: () => quick.person().birthDateBE },
+    { cat: "date", title: "วันเกิด ค.ศ. (ISO)", keys: "birth date iso", gen: () => quick.person().birthDate },
+    { cat: "person", title: "บุคคลครบชุด (JSON)", keys: "person คน json ทั้งหมด", gen: () => JSON.stringify(quick.person(), null, 2), json: true },
+  ];
+  $("kindCount").textContent = CATALOG.length;
+
+  const cards = CATALOG.map((entry) => {
+    const el = document.createElement("article");
+    el.className = "item";
+    el.innerHTML = `<div class="item-head"><h3></h3><span class="tag"></span></div><div class="value"></div>
+      <div class="actions"><button class="btn primary" type="button" data-act="copy">คัดลอก</button><button class="btn" type="button" data-act="new">สุ่มใหม่</button></div>`;
+    el.querySelector("h3").textContent = entry.title;
+    const tag = el.querySelector(".tag");
+    if (entry.negative) { tag.textContent = "negative"; tag.classList.add("neg"); } else tag.remove();
+    const valueEl = el.querySelector(".value");
+    if (entry.json) valueEl.classList.add("json");
+    const refresh = () => { valueEl.textContent = entry.gen(); };
+    el.querySelector('[data-act="new"]').addEventListener("click", refresh);
+    el.querySelector('[data-act="copy"]').addEventListener("click", () => copy(valueEl.textContent));
+    refresh();
+    $("grid").appendChild(el);
+    return { el, cat: entry.cat, text: `${entry.title} ${entry.keys} ${CATEGORIES[entry.cat]}`.toLowerCase() };
+  });
+
+  let activeCat = "all";
+  const chipDefs = [["all", "ทั้งหมด", CATALOG.length], ...Object.entries(CATEGORIES).map(([k, label]) => [k, label, CATALOG.filter((c) => c.cat === k).length])];
+  chipDefs.forEach(([key, label, n]) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "chip";
+    b.dataset.cat = key;
+    b.setAttribute("aria-pressed", String(key === activeCat));
+    b.innerHTML = `<span></span><span class="n">${n}</span>`;
+    b.firstChild.textContent = label;
+    b.addEventListener("click", () => {
+      activeCat = key;
+      $("chips").querySelectorAll(".chip").forEach((c) => c.setAttribute("aria-pressed", String(c.dataset.cat === key)));
+      applyFilter();
+    });
+    $("chips").appendChild(b);
+  });
+
+  function applyFilter() {
+    const terms = $("q").value.toLowerCase().trim().split(/\s+/).filter(Boolean);
+    let shown = 0;
+    cards.forEach(({ el, cat, text }) => {
+      const match = (activeCat === "all" || cat === activeCat) && terms.every((t) => text.includes(t));
+      el.hidden = !match;
+      if (match) shown++;
+    });
+    $("empty").hidden = shown > 0;
+  }
+  $("q").addEventListener("input", applyFilter);
+
+  // Bulk generator
+  let rows = [];
   const flatten = (kind, v) => {
     if (kind === "person") return {
       ชื่อ: v.fullNameTh, Name: v.fullNameEn, เลขบัตร: v.citizenId, โทร: v.phone,
       อีเมล: v.email, "วันเกิด (พ.ศ.)": v.birthDateBE, ที่อยู่: v.address.fullAddress,
     };
-    if (kind === "address") return {
-      ที่อยู่: v.fullAddress, จังหวัด: v.province, รหัสไปรษณีย์: v.postalCode,
-    };
+    if (kind === "address") return { ที่อยู่: v.fullAddress, จังหวัด: v.province, รหัสไปรษณีย์: v.postalCode };
     if (kind === "phone") return { เบอร์: v, รูปแบบ: formatPhone(v) };
     return { เลข: v, รูปแบบ: formatThaiId(v), "valid?": isValidThaiId(v) ? "✓" : "✗" };
   };
@@ -149,96 +412,43 @@ await page.fill("#address", user.address.fullAddress);</code></pre>
     rows.forEach(({ flat }) => {
       const tr = body.insertRow();
       cols.forEach((c) => {
-        const td = tr.insertCell();
-        td.textContent = flat[c];
-        if (/^[\d+\-/]+$/.test(String(flat[c]))) td.className = "mono";
+        const cell = tr.insertCell();
+        cell.textContent = flat[c];
+        if (/^[\d+\-/]+$/.test(String(flat[c]))) cell.className = "mono";
       });
     });
   }
 
-  function toast(msg) {
-    const t = $("toast"); t.textContent = msg; t.classList.add("show");
-    setTimeout(() => t.classList.remove("show"), 1500);
-  }
+  const toCsv = () => {
+    const cols = Object.keys(rows[0].flat);
+    const esc = (s) => `"${String(s).replace(/"/g, '""')}"`;
+    return [cols.map(esc).join(","), ...rows.map((r) => cols.map((c) => esc(r.flat[c])).join(","))].join("\n");
+  };
 
   $("gen").addEventListener("click", render);
   $("kind").addEventListener("change", render);
-  $("copyJson").addEventListener("click", async () => {
-    try {
-      await navigator.clipboard.writeText(JSON.stringify(rows.map((r) => r.raw), null, 2));
-      toast("คัดลอก JSON แล้ว");
-    } catch { toast("คัดลอกไม่สำเร็จ"); }
-  });
+  $("copyJson").addEventListener("click", () => copy(JSON.stringify(rows.map((r) => r.raw), null, 2), "คัดลอก JSON แล้ว"));
   $("dlCsv").addEventListener("click", () => {
-    const cols = Object.keys(rows[0].flat);
-    const esc = (s) => `"${String(s).replace(/"/g, '""')}"`;
-    const csv = "﻿" + [cols.map(esc).join(","), ...rows.map((r) => cols.map((c) => esc(r.flat[c])).join(","))].join("\n");
     const a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    a.href = URL.createObjectURL(new Blob(["﻿" + toCsv()], { type: "text/csv;charset=utf-8" }));
     a.download = `thai-test-data-${$("kind").value}.csv`;
     a.click();
     URL.revokeObjectURL(a.href);
   });
+
+  // Validator
   $("idInput").addEventListener("input", (e) => {
     const v = e.target.value.trim(), r = $("idResult");
-    if (!v) { r.textContent = ""; r.className = "result"; return; }
+    if (!v) { r.replaceChildren(); r.className = "result"; return; }
+    const digits = v.replace(/\D/g, "");
     const ok = isValidThaiId(v);
-    r.textContent = ok ? "✓ เลขถูกต้อง (check digit ตรง)" : "✗ เลขไม่ถูกต้อง";
+    const pill = document.createElement("span");
+    pill.className = "pill";
+    pill.textContent = ok ? "✓ เลขถูกต้อง" : digits.length !== 13 ? `✗ ต้องมี 13 หลัก (ตอนนี้ ${digits.length})` : "✗ check digit ไม่ตรง";
+    const note = document.createElement("small");
+    if (ok) note.textContent = digits[0] === "0" ? "นิติบุคคล" : "บุคคลธรรมดา";
+    r.replaceChildren(pill, note);
     r.className = "result " + (ok ? "ok" : "bad");
-  });
-
-
-  // Catalog for the search view: each entry is one kind of value a tester may need.
-  const quick = createThaiData();
-  const CATALOG = [
-    { title: "เลขบัตรประชาชน (valid)", keys: "บัตรประชาชน citizen id national เลขบัตร 13 หลัก", gen: () => quick.citizenId() },
-    { title: "เลขบัตรประชาชน แบบมีขีด", keys: "บัตรประชาชน citizen id format dash ขีด", gen: () => formatThaiId(quick.citizenId()) },
-    { title: "เลขบัตรประชาชน (invalid)", keys: "บัตรประชาชน citizen id invalid negative ผิด", gen: () => quick.invalidCitizenId() },
-    { title: "เลขผู้เสียภาษีนิติบุคคล", keys: "นิติบุคคล บริษัท ภาษี tax juristic company", gen: () => quick.juristicId() },
-    { title: "เบอร์มือถือ", keys: "เบอร์ โทรศัพท์ มือถือ phone mobile tel", gen: () => quick.phone() },
-    { title: "เบอร์มือถือ แบบมีขีด", keys: "เบอร์ โทรศัพท์ มือถือ phone mobile format dash", gen: () => formatPhone(quick.phone()) },
-    { title: "เบอร์มือถือ (+66)", keys: "เบอร์ โทรศัพท์ phone e164 international +66", gen: () => toE164(quick.phone()) },
-    { title: "ชื่อ-นามสกุล (ไทย)", keys: "ชื่อ นามสกุล name thai", gen: () => quick.name().fullNameTh },
-    { title: "ชื่อ-นามสกุล (อังกฤษ)", keys: "ชื่อ นามสกุล name english", gen: () => quick.name().fullNameEn },
-    { title: "อีเมล", keys: "อีเมล email mail", gen: () => quick.person().email },
-    { title: "ที่อยู่เต็ม", keys: "ที่อยู่ address บ้าน", gen: () => quick.address().fullAddress },
-    { title: "จังหวัด + รหัสไปรษณีย์", keys: "จังหวัด province รหัสไปรษณีย์ zip postal code", gen: () => { const a = quick.address(); return `${a.province} ${a.postalCode}`; } },
-    { title: "วันเกิด (พ.ศ.)", keys: "วันเกิด birth date พ.ศ. buddhist", gen: () => quick.person().birthDateBE },
-    { title: "วันเกิด (ค.ศ. ISO)", keys: "วันเกิด birth date iso ค.ศ.", gen: () => quick.person().birthDate },
-    { title: "บุคคลครบชุด (JSON)", keys: "บุคคล person คน ครบ json ทั้งหมด", gen: () => JSON.stringify(quick.person(), null, 2) },
-  ];
-
-  const cards = CATALOG.map((entry) => {
-    const el = document.createElement("div");
-    el.className = "item";
-    el.innerHTML = '<h3></h3><div class="value"></div><div class="actions"><button data-act="new">สุ่มใหม่</button><button data-act="copy">คัดลอก</button></div>';
-    el.querySelector("h3").textContent = entry.title;
-    const valueEl = el.querySelector(".value");
-    const refresh = () => {
-      const v = entry.gen();
-      valueEl.textContent = v;
-      valueEl.style.whiteSpace = v.includes("\n") ? "pre" : "normal";
-      valueEl.style.overflowX = "auto";
-    };
-    el.querySelector('[data-act="new"]').addEventListener("click", refresh);
-    el.querySelector('[data-act="copy"]').addEventListener("click", async () => {
-      try { await navigator.clipboard.writeText(valueEl.textContent); toast("คัดลอกแล้ว"); }
-      catch { toast("คัดลอกไม่สำเร็จ"); }
-    });
-    refresh();
-    $("grid").appendChild(el);
-    return { el, text: (entry.title + " " + entry.keys).toLowerCase() };
-  });
-
-  $("search").addEventListener("input", (e) => {
-    const terms = e.target.value.toLowerCase().trim().split(/\s+/).filter(Boolean);
-    let shown = 0;
-    cards.forEach(({ el, text }) => {
-      const match = terms.every((t) => text.includes(t));
-      el.hidden = !match;
-      if (match) shown++;
-    });
-    $("empty").hidden = shown > 0;
   });
 
   render();
