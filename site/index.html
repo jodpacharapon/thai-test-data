@@ -42,6 +42,16 @@
   .result { margin-top: 8px; font-weight: 600; min-height: 1.6em; }
   .result.ok { color: var(--ok); } .result.bad { color: var(--bad); }
   pre { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; overflow-x: auto; font-size: 0.85rem; margin: 0; }
+  .search { width: 100%; font-size: 1.05rem; padding: 12px 14px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin-top: 16px; }
+  .item { border: 1px solid var(--border); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 8px; background: var(--bg); }
+  .item[hidden] { display: none; }
+  .item h3 { font-size: 0.95rem; margin: 0; }
+  .item .value { font-family: "IBM Plex Mono", "IBM Plex Sans Thai", monospace; font-size: 0.95rem; word-break: break-word; min-height: 1.6em; }
+  .item .actions { display: flex; gap: 6px; margin-top: auto; }
+  .item .actions button { padding: 4px 10px; font-size: 0.85rem; }
+  .empty { color: var(--muted); margin-top: 12px; }
+  .note { color: var(--muted); font-size: 0.85rem; text-align: center; margin-top: 24px; }
   .toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg);
     padding: 8px 16px; border-radius: 8px; opacity: 0; transition: opacity .2s; pointer-events: none; }
   .toast.show { opacity: 1; }
@@ -54,7 +64,14 @@
     <a href="https://github.com/jodpacharapon/hellotester">GitHub</a></p>
 
   <section class="card">
-    <h2>สร้างข้อมูล</h2>
+    <h2>ค้นหาข้อมูลที่ต้องการ</h2>
+    <input id="search" class="search" type="search" placeholder="พิมพ์ค้นหา เช่น บัตรประชาชน, เบอร์, ที่อยู่, zip, email…" aria-label="ค้นหาชนิดข้อมูล">
+    <div id="grid" class="grid"></div>
+    <p id="empty" class="empty" hidden>ไม่พบข้อมูลที่ค้นหา อยากให้มีเพิ่ม? <a href="https://github.com/jodpacharapon/hellotester/issues">เปิด issue</a> ได้เลย</p>
+  </section>
+
+  <section class="card">
+    <h2>สร้างข้อมูลทีละหลายรายการ</h2>
     <div class="controls">
       <select id="kind" aria-label="ชนิดข้อมูล">
         <option value="person">บุคคล (ครบชุด)</option>
@@ -94,11 +111,13 @@ await page.fill("#citizenId", user.citizenId);
 await page.fill("#phone", user.phone);
 await page.fill("#address", user.address.fullAddress);</code></pre>
   </section>
+  <p class="note">ข้อมูลทั้งหมดสุ่มขึ้นในเบราว์เซอร์ของคุณ ไม่มีการส่งหรือเก็บไว้ที่ใด ใช้เพื่อการทดสอบระบบเท่านั้น<br>
+    เลขที่สุ่มอาจบังเอิญตรงกับบุคคลจริงได้ ห้ามนำไปใช้สมัครบริการจริงหรือแอบอ้างตัวตน</p>
 </main>
 <div class="toast" id="toast"></div>
 
 <script type="module">
-  import { createThaiData, isValidThaiId, formatThaiId, formatPhone } from "./lib/index.js";
+  import { createThaiData, isValidThaiId, formatThaiId, formatPhone, toE164 } from "./lib/index.js";
 
   const $ = (id) => document.getElementById(id);
   let rows = [];
@@ -166,6 +185,60 @@ await page.fill("#address", user.address.fullAddress);</code></pre>
     const ok = isValidThaiId(v);
     r.textContent = ok ? "✓ เลขถูกต้อง (check digit ตรง)" : "✗ เลขไม่ถูกต้อง";
     r.className = "result " + (ok ? "ok" : "bad");
+  });
+
+
+  // Catalog for the search view: each entry is one kind of value a tester may need.
+  const quick = createThaiData();
+  const CATALOG = [
+    { title: "เลขบัตรประชาชน (valid)", keys: "บัตรประชาชน citizen id national เลขบัตร 13 หลัก", gen: () => quick.citizenId() },
+    { title: "เลขบัตรประชาชน แบบมีขีด", keys: "บัตรประชาชน citizen id format dash ขีด", gen: () => formatThaiId(quick.citizenId()) },
+    { title: "เลขบัตรประชาชน (invalid)", keys: "บัตรประชาชน citizen id invalid negative ผิด", gen: () => quick.invalidCitizenId() },
+    { title: "เลขผู้เสียภาษีนิติบุคคล", keys: "นิติบุคคล บริษัท ภาษี tax juristic company", gen: () => quick.juristicId() },
+    { title: "เบอร์มือถือ", keys: "เบอร์ โทรศัพท์ มือถือ phone mobile tel", gen: () => quick.phone() },
+    { title: "เบอร์มือถือ แบบมีขีด", keys: "เบอร์ โทรศัพท์ มือถือ phone mobile format dash", gen: () => formatPhone(quick.phone()) },
+    { title: "เบอร์มือถือ (+66)", keys: "เบอร์ โทรศัพท์ phone e164 international +66", gen: () => toE164(quick.phone()) },
+    { title: "ชื่อ-นามสกุล (ไทย)", keys: "ชื่อ นามสกุล name thai", gen: () => quick.name().fullNameTh },
+    { title: "ชื่อ-นามสกุล (อังกฤษ)", keys: "ชื่อ นามสกุล name english", gen: () => quick.name().fullNameEn },
+    { title: "อีเมล", keys: "อีเมล email mail", gen: () => quick.person().email },
+    { title: "ที่อยู่เต็ม", keys: "ที่อยู่ address บ้าน", gen: () => quick.address().fullAddress },
+    { title: "จังหวัด + รหัสไปรษณีย์", keys: "จังหวัด province รหัสไปรษณีย์ zip postal code", gen: () => { const a = quick.address(); return `${a.province} ${a.postalCode}`; } },
+    { title: "วันเกิด (พ.ศ.)", keys: "วันเกิด birth date พ.ศ. buddhist", gen: () => quick.person().birthDateBE },
+    { title: "วันเกิด (ค.ศ. ISO)", keys: "วันเกิด birth date iso ค.ศ.", gen: () => quick.person().birthDate },
+    { title: "บุคคลครบชุด (JSON)", keys: "บุคคล person คน ครบ json ทั้งหมด", gen: () => JSON.stringify(quick.person(), null, 2) },
+  ];
+
+  const cards = CATALOG.map((entry) => {
+    const el = document.createElement("div");
+    el.className = "item";
+    el.innerHTML = '<h3></h3><div class="value"></div><div class="actions"><button data-act="new">สุ่มใหม่</button><button data-act="copy">คัดลอก</button></div>';
+    el.querySelector("h3").textContent = entry.title;
+    const valueEl = el.querySelector(".value");
+    const refresh = () => {
+      const v = entry.gen();
+      valueEl.textContent = v;
+      valueEl.style.whiteSpace = v.includes("\n") ? "pre" : "normal";
+      valueEl.style.overflowX = "auto";
+    };
+    el.querySelector('[data-act="new"]').addEventListener("click", refresh);
+    el.querySelector('[data-act="copy"]').addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(valueEl.textContent); toast("คัดลอกแล้ว"); }
+      catch { toast("คัดลอกไม่สำเร็จ"); }
+    });
+    refresh();
+    $("grid").appendChild(el);
+    return { el, text: (entry.title + " " + entry.keys).toLowerCase() };
+  });
+
+  $("search").addEventListener("input", (e) => {
+    const terms = e.target.value.toLowerCase().trim().split(/\s+/).filter(Boolean);
+    let shown = 0;
+    cards.forEach(({ el, text }) => {
+      const match = terms.every((t) => text.includes(t));
+      el.hidden = !match;
+      if (match) shown++;
+    });
+    $("empty").hidden = shown > 0;
   });
 
   render();

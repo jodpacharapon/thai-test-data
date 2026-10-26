@@ -11,6 +11,12 @@ check digits, mobile numbers, Thai/English names, consistent addresses, and Budd
 
 🔗 **ลองใช้บนเว็บ:** https://jodpacharapon.github.io/hellotester/
 
+## ใช้ได้ 2 แบบ
+
+- **🌐 เว็บ (สำหรับ Tester ทุกคน):** พิมพ์ค้นหาชนิดข้อมูลที่ต้องการ เช่น "บัตร", "เบอร์" หรือ "zip"
+  แล้วกดสุ่มหรือคัดลอกได้ทันที ถ้าต้องการหลายรายการก็สร้างครั้งละหลายแถวแล้วดาวน์โหลดเป็น CSV หรือ JSON ได้
+- **📦 Library (สำหรับ Automation Tester):** `npm install thai-test-data` แล้วเรียกใช้ในสคริปต์เทส
+
 ## ทำไมต้องใช้
 
 ฟอร์มในระบบไทยมักตรวจ check digit ของเลขบัตรประชาชน ถ้าพิมพ์ `1111111111111` ระบบจะไม่ยอมรับ
