@@ -11,20 +11,35 @@
       "import": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "site": "npm run build && rm -rf site/lib && cp -r dist site/lib"
   },
-  "keywords": ["thai", "thailand", "test-data", "faker", "fixtures", "test-automation", "playwright", "qa", "citizen-id"],
+  "keywords": [
+    "thai",
+    "thailand",
+    "test-data",
+    "faker",
+    "fixtures",
+    "test-automation",
+    "playwright",
+    "qa",
+    "citizen-id"
+  ],
   "license": "MIT",
+  "homepage": "https://thai-test-data.vercel.app",
   "repository": {
     "type": "git",
     "url": "https://github.com/jodpacharapon/thai-test-data.git"
   },
-  "engines": { "node": ">=18" },
+  "engines": {
+    "node": ">=18"
+  },
   "devDependencies": {
     "typescript": "5.9.3",
     "vitest": "3.2.4"

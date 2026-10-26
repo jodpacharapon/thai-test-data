@@ -9,7 +9,7 @@
 Generate realistic, **valid** Thai test data for automated tests: national ID numbers with correct
 check digits, mobile numbers, Thai/English names, consistent addresses, and Buddhist-era dates.
 
-🔗 **ลองใช้บนเว็บ:** https://jodpacharapon.github.io/thai-test-data/
+🔗 **ลองใช้บนเว็บ:** https://thai-test-data.vercel.app
 
 ## ใช้ได้ 2 แบบ
 
