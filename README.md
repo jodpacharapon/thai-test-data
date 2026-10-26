@@ -1,6 +1,6 @@
 # Thai Test Data 🇹🇭
 
-[![CI](https://github.com/jodpacharapon/hellotester/actions/workflows/ci.yml/badge.svg)](https://github.com/jodpacharapon/hellotester/actions/workflows/ci.yml)
+[![CI](https://github.com/jodpacharapon/thai-test-data/actions/workflows/ci.yml/badge.svg)](https://github.com/jodpacharapon/thai-test-data/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 สร้าง **ข้อมูลทดสอบภาษาไทยที่ผ่าน validation ได้จริง** สำหรับ Automation Test
@@ -9,7 +9,7 @@
 Generate realistic, **valid** Thai test data for automated tests: national ID numbers with correct
 check digits, mobile numbers, Thai/English names, consistent addresses, and Buddhist-era dates.
 
-🔗 **ลองใช้บนเว็บ:** https://jodpacharapon.github.io/hellotester/
+🔗 **ลองใช้บนเว็บ:** https://jodpacharapon.github.io/thai-test-data/
 
 ## ใช้ได้ 2 แบบ
 
