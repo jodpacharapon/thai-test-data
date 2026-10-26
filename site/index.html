@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thai Test Data</title>
+<meta name="description" content="สร้างข้อมูลทดสอบภาษาไทยที่ valid จริง: เลขบัตรประชาชน เบอร์มือถือ ชื่อ ที่อยู่ วันที่ พ.ศ.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;600&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f7f5; --surface: #fff; --text: #1d1d1b; --muted: #6b6b66;
+    --border: #e2e2dc; --accent: #0f6e56; --accent-text: #fff; --ok: #0f6e56; --bad: #b42318;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #151514; --surface: #1f1f1d; --text: #ececea; --muted: #a0a09a;
+      --border: #33332f; --accent: #3fb68b; --accent-text: #0b0b0a; --ok: #3fb68b; --bad: #f97066; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.6 "IBM Plex Sans Thai", system-ui, sans-serif; }
+  main { max-width: 960px; margin: 0 auto; padding: 40px 16px 64px; }
+  h1 { font-size: 2rem; margin: 0 0 4px; }
+  .lead { color: var(--muted); margin: 0 0 24px; }
+  .lead a { color: var(--accent); }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+  h2 { font-size: 1.1rem; margin: 0 0 12px; }
+  .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  select, input, button { font: inherit; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); padding: 8px 12px; }
+  input[type=number] { width: 80px; }
+  button { cursor: pointer; }
+  button.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 600; }
+  label { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); }
+  .table-wrap { overflow-x: auto; margin-top: 16px; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th { color: var(--muted); font-weight: 600; }
+  td.mono, .mono { font-family: "IBM Plex Mono", monospace; }
+  .validator { display: flex; gap: 8px; flex-wrap: wrap; }
+  .validator input { flex: 1; min-width: 200px; font-family: "IBM Plex Mono", monospace; }
+  .result { margin-top: 8px; font-weight: 600; min-height: 1.6em; }
+  .result.ok { color: var(--ok); } .result.bad { color: var(--bad); }
+  pre { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; overflow-x: auto; font-size: 0.85rem; margin: 0; }
+  .toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg);
+    padding: 8px 16px; border-radius: 8px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Thai Test Data 🇹🇭</h1>
+  <p class="lead">สร้างข้อมูลทดสอบภาษาไทยที่ผ่าน validation ได้จริง สำหรับ Automation Test ·
+    <a href="https://github.com/jodpacharapon/hellotester">GitHub</a></p>
+
+  <section class="card">
+    <h2>สร้างข้อมูล</h2>
+    <div class="controls">
+      <select id="kind" aria-label="ชนิดข้อมูล">
+        <option value="person">บุคคล (ครบชุด)</option>
+        <option value="citizenId">เลขบัตรประชาชน (valid)</option>
+        <option value="invalidCitizenId">เลขบัตรประชาชน (invalid, ใช้เทส negative)</option>
+        <option value="juristicId">เลขผู้เสียภาษีนิติบุคคล</option>
+        <option value="phone">เบอร์มือถือ</option>
+        <option value="address">ที่อยู่</option>
+      </select>
+      <label>จำนวน <input id="count" type="number" min="1" max="500" value="5"></label>
+      <label>Seed <input id="seed" type="number" placeholder="สุ่ม"></label>
+      <button class="primary" id="gen">สร้าง</button>
+      <button id="copyJson">คัดลอก JSON</button>
+      <button id="dlCsv">ดาวน์โหลด CSV</button>
+    </div>
+    <div class="table-wrap"><table id="out"></table></div>
+  </section>
+
+  <section class="card">
+    <h2>ตรวจเลขบัตรประชาชน / เลขผู้เสียภาษี</h2>
+    <div class="validator">
+      <input id="idInput" placeholder="เช่น 1-2345-67890-12-1" inputmode="numeric">
+    </div>
+    <div id="idResult" class="result" aria-live="polite"></div>
+  </section>
+
+  <section class="card">
+    <h2>ใช้ในโค้ดเทส</h2>
+<pre><code>npm install thai-test-data
+
+import { createThaiData, isValidThaiId } from "thai-test-data";
+
+const td = createThaiData({ seed: 42 }); // seed เดิม = ข้อมูลเดิม
+const user = td.person();
+
+await page.fill("#citizenId", user.citizenId);
+await page.fill("#phone", user.phone);
+await page.fill("#address", user.address.fullAddress);</code></pre>
+  </section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  import { createThaiData, isValidThaiId, formatThaiId, formatPhone } from "./lib/index.js";
+
+  const $ = (id) => document.getElementById(id);
+  let rows = [];
+
+  const flatten = (kind, v) => {
+    if (kind === "person") return {
+      ชื่อ: v.fullNameTh, Name: v.fullNameEn, เลขบัตร: v.citizenId, โทร: v.phone,
+      อีเมล: v.email, "วันเกิด (พ.ศ.)": v.birthDateBE, ที่อยู่: v.address.fullAddress,
+    };
+    if (kind === "address") return {
+      ที่อยู่: v.fullAddress, จังหวัด: v.province, รหัสไปรษณีย์: v.postalCode,
+    };
+    if (kind === "phone") return { เบอร์: v, รูปแบบ: formatPhone(v) };
+    return { เลข: v, รูปแบบ: formatThaiId(v), "valid?": isValidThaiId(v) ? "✓" : "✗" };
+  };
+
+  function render() {
+    const kind = $("kind").value;
+    const count = Math.min(500, Math.max(1, Number($("count").value) || 1));
+    const seedVal = $("seed").value;
+    const td = createThaiData(seedVal === "" ? {} : { seed: Number(seedVal) });
+    rows = td.many(count, () => td[kind]()).map((v) => ({ raw: v, flat: flatten(kind, v) }));
+    const cols = Object.keys(rows[0].flat);
+    const table = $("out");
+    table.replaceChildren();
+    const head = table.createTHead().insertRow();
+    cols.forEach((c) => { const th = document.createElement("th"); th.textContent = c; head.appendChild(th); });
+    const body = table.createTBody();
+    rows.forEach(({ flat }) => {
+      const tr = body.insertRow();
+      cols.forEach((c) => {
+        const td = tr.insertCell();
+        td.textContent = flat[c];
+        if (/^[\d+\-/]+$/.test(String(flat[c]))) td.className = "mono";
+      });
+    });
+  }
+
+  function toast(msg) {
+    const t = $("toast"); t.textContent = msg; t.classList.add("show");
+    setTimeout(() => t.classList.remove("show"), 1500);
+  }
+
+  $("gen").addEventListener("click", render);
+  $("kind").addEventListener("change", render);
+  $("copyJson").addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(rows.map((r) => r.raw), null, 2));
+      toast("คัดลอก JSON แล้ว");
+    } catch { toast("คัดลอกไม่สำเร็จ"); }
+  });
+  $("dlCsv").addEventListener("click", () => {
+    const cols = Object.keys(rows[0].flat);
+    const esc = (s) => `"${String(s).replace(/"/g, '""')}"`;
+    const csv = "﻿" + [cols.map(esc).join(","), ...rows.map((r) => cols.map((c) => esc(r.flat[c])).join(","))].join("\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    a.download = `thai-test-data-${$("kind").value}.csv`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+  $("idInput").addEventListener("input", (e) => {
+    const v = e.target.value.trim(), r = $("idResult");
+    if (!v) { r.textContent = ""; r.className = "result"; return; }
+    const ok = isValidThaiId(v);
+    r.textContent = ok ? "✓ เลขถูกต้อง (check digit ตรง)" : "✗ เลขไม่ถูกต้อง";
+    r.className = "result " + (ok ? "ok" : "bad");
+  });
+
+  render();
+</script>
+</body>
+</html>

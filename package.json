@@ -1,0 +1,32 @@
+{
+  "name": "thai-test-data",
+  "version": "0.1.0",
+  "description": "Generate realistic, valid Thai test data (national ID, phone, names, addresses, Buddhist-era dates) for automated testing.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "site": "npm run build && rm -rf site/lib && cp -r dist site/lib"
+  },
+  "keywords": ["thai", "thailand", "test-data", "faker", "fixtures", "test-automation", "playwright", "qa", "citizen-id"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jodpacharapon/hellotester.git"
+  },
+  "engines": { "node": ">=18" },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "vitest": "3.2.4"
+  }
+}
