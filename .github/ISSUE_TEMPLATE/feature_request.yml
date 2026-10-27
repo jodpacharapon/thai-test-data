@@ -1,21 +1,21 @@
 name: Feature request
-description: ขอชนิดข้อมูลใหม่ กรณีผิดแบบใหม่ หรือฟีเจอร์อื่น
+description: ขอ data type ใหม่ invalid case แบบใหม่ หรือ feature อื่น
 labels: [enhancement]
 body:
   - type: textarea
     id: need
     attributes:
-      label: อยากได้อะไร
+      label: Request
       description: เช่น เลขบัญชีธนาคาร, ทะเบียนรถ, รหัสไปรษณีย์ที่ไม่ตรงอำเภอ
     validations:
       required: true
   - type: textarea
     id: rule
     attributes:
-      label: กฎการตรวจ (validation rule)
-      description: ระบบจริงตรวจข้อมูลนี้ยังไง ถ้ามีลิงก์อ้างอิงยิ่งดี
+      label: Validation rule
+      description: ระบบจริง validate ข้อมูลนี้ยังไง มี link reference ยิ่งดี
   - type: textarea
     id: usecase
     attributes:
-      label: จะเอาไปเทสอะไร
-      description: ช่วยให้เข้าใจว่าควรมีตัวเลือกอะไรบ้าง
+      label: Use case
+      description: จะเอาไปใช้ test อะไร ช่วยให้รู้ว่าควรมี option อะไรบ้าง

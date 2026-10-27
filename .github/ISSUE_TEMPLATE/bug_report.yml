@@ -1,19 +1,19 @@
 name: Bug report
-description: ข้อมูลที่สร้างผิด หรือ web app/library ทำงานไม่ถูกต้อง
+description: ข้อมูลที่ generate ออกมาผิด หรือ web app/library ทำงานไม่ถูกต้อง
 labels: [bug]
 body:
   - type: textarea
     id: what
     attributes:
-      label: เกิดอะไรขึ้น
-      description: อธิบายสิ่งที่เห็น และสิ่งที่ควรจะเป็น
+      label: Description
+      description: เกิดอะไรขึ้น และควรจะเป็นแบบไหน (expected vs actual)
     validations:
       required: true
   - type: textarea
     id: steps
     attributes:
-      label: วิธีทำให้เกิดซ้ำ
-      description: ขั้นตอนหรือโค้ดที่ใช้ ถ้าใส่ seed ด้วยจะช่วยได้มาก
+      label: Steps to reproduce
+      description: ขั้นตอนหรือ code ที่ใช้ ถ้าใส่ seed ด้วยจะช่วยได้มาก
       placeholder: |
         const td = createThaiData({ seed: 42 });
         td.citizenId();
@@ -22,7 +22,7 @@ body:
   - type: dropdown
     id: where
     attributes:
-      label: เจอที่ไหน
+      label: Where
       options:
         - Web app
         - Library (npm)
@@ -31,5 +31,5 @@ body:
   - type: input
     id: version
     attributes:
-      label: เวอร์ชัน
-      description: เวอร์ชันของแพ็กเกจ หรือเบราว์เซอร์ที่ใช้
+      label: Version
+      description: version ของ package หรือ browser ที่ใช้

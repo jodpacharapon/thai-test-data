@@ -10,54 +10,54 @@ Realistic, valid Thai test data for QA and test automation, with negative cases 
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6)
 ![Zero dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)
 
-[**Web app**](https://thai-test-data.vercel.app) · [**Docs**](https://thai-test-data.vercel.app/#docs) · [Report a bug](https://github.com/jodpacharapon/thai-test-data/issues/new?template=bug_report.yml) · [Request a data type](https://github.com/jodpacharapon/thai-test-data/issues/new?template=feature_request.yml)
+[**Web app**](https://thai-test-data.vercel.app) · [**Docs**](https://thai-test-data.vercel.app/#docs) · [Report a bug](https://thai-test-data.vercel.app/#report) · [Request a data type](https://github.com/jodpacharapon/thai-test-data/issues/new?template=feature_request.yml)
 
-<img src="docs/screenshot.png" alt="หน้า Generator: สุ่มเลขบัตรประชาชนแบบผสมถูกและผิด พร้อมผลที่ควรได้ของแต่ละแถว" width="860">
+<img src="docs/screenshot.png" alt="Generator: เลขบัตรประชาชนแบบ mixed valid/invalid พร้อม expected result ทุกแถว" width="860">
 
 </div>
 
-## สารบัญ
+## Contents
 
-- [ทำไมต้องใช้](#ทำไมต้องใช้)
-- [ฟีเจอร์](#ฟีเจอร์)
-- [เริ่มต้นใช้งาน](#เริ่มต้นใช้งาน)
-- [ตัวอย่างการใช้งาน](#ตัวอย่างการใช้งาน)
+- [Why](#why)
+- [Features](#features)
+- [Quick start](#quick-start)
+- [Usage](#usage)
 - [API Reference](#api-reference)
-- [โครงสร้างโปรเจกต์](#โครงสร้างโปรเจกต์)
-- [พัฒนาในเครื่อง](#พัฒนาในเครื่อง)
-- [ข้อมูลที่อยู่](#ข้อมูลที่อยู่)
+- [Project structure](#project-structure)
+- [Development](#development)
+- [Address data](#address-data)
 - [Contributing](#contributing)
 - [Disclaimer](#disclaimer)
 - [License](#license)
 
-## ทำไมต้องใช้
+## Why
 
 ระบบไทยส่วนใหญ่ตรวจ check digit ของเลขบัตรประชาชน และตรวจว่ารหัสไปรษณีย์ตรงกับจังหวัดหรือไม่
-ถ้ากรอก `1111111111111` หรือที่อยู่มั่วๆ ฟอร์มจะไม่ผ่าน Tester เลยต้องเสียเวลาหาข้อมูลที่ "ถูกพอ" มาใช้ทุกครั้ง
+ถ้ากรอก `1111111111111` หรือที่อยู่มั่วๆ form จะไม่ผ่าน tester เลยต้องเสียเวลาหา test data ที่ "ถูกพอ" มาใช้ทุกครั้ง
 
-Thai Test Data สร้างข้อมูลที่ผ่าน validation ได้ทันที และสร้าง**ข้อมูลที่ผิดแบบตั้งใจ**ได้ด้วย
-โดยแต่ละค่าบอกผลที่ควรได้ (expected result) ไว้ เอาไปเขียน negative test ได้เลย
+Thai Test Data generate ข้อมูลที่ผ่าน validation ได้ทันที และ generate **invalid data แบบตั้งใจ**ได้ด้วย
+แต่ละค่ามี expected result บอกไว้ เอาไปเขียน negative test case ได้เลย
 
 ใช้ได้ 2 แบบ:
 
-| | สำหรับ | ใช้ยังไง |
+| | For | How |
 |---|---|---|
-| 🌐 **Web app** | Tester ทุกคน | เปิด [thai-test-data.vercel.app](https://thai-test-data.vercel.app) เลือกชนิดข้อมูล ตั้งค่า แล้วคลิกคัดลอก หรือดาวน์โหลด CSV/JSON |
-| 📦 **Library** | Automation Tester | `npm install thai-test-data` แล้วเรียกใช้ใน Playwright, Cypress, Jest หรือ Vitest |
+| 🌐 **Web app** | Manual / QA tester | เปิด [thai-test-data.vercel.app](https://thai-test-data.vercel.app) เลือก data type ตั้งค่า แล้ว copy หรือ export เป็น CSV/JSON |
+| 📦 **Library** | Automation tester | `npm install thai-test-data` แล้วเรียกใช้ใน Playwright, Cypress, Jest หรือ Vitest |
 
-## ฟีเจอร์
+## Features
 
 - **เลขบัตรประชาชนและเลขนิติบุคคล** ที่ check digit ถูกต้อง กำหนดหลักแรก (ประเภทบุคคล 1–8) ได้
-- **เบอร์มือถือ** ขึ้นต้น 06/08/09 พร้อมรูปแบบมีขีดและ +66
+- **เบอร์มือถือ** ขึ้นต้น 06/08/09 มี format แบบมีขีดและ +66
 - **ชื่อ-นามสกุล** ไทยและอังกฤษ มีคำนำหน้า เลือกเพศได้
-- **ที่อยู่ครบ 77 จังหวัด 7,436 ตำบล** ที่จังหวัด อำเภอ ตำบล และรหัสไปรษณีย์ตรงกันจริง มีแบบภาษาอังกฤษ
-- **รหัสไปรษณีย์ 966 รหัส** พร้อมค้นว่ารหัสเป็นของพื้นที่ไหน
-- **วันเกิด** ตามช่วงอายุ ในรูปแบบ พ.ศ., แบบเต็ม หรือ ISO
-- **Negative cases ทุกชนิด** เช่น check digit ผิด, ไม่ครบหลัก, มีตัวอักษรปน, รหัสไปรษณีย์ไม่ตรงจังหวัด, วันที่ 31/04
-- **Seed ได้** ใส่ seed เดิมได้ข้อมูลชุดเดิม เทสพังแล้ว debug ซ้ำได้
+- **ที่อยู่ครบ 77 จังหวัด 7,436 ตำบล** ที่จังหวัด อำเภอ ตำบล และรหัสไปรษณีย์ตรงกันจริง มี format ภาษาอังกฤษ
+- **รหัสไปรษณีย์ 966 รหัส** พร้อม lookup ว่ารหัสเป็นของพื้นที่ไหน
+- **วันเกิด** ตามช่วงอายุ format พ.ศ., แบบเต็ม หรือ ISO
+- **Negative cases ทุก data type** เช่น check digit ผิด, ไม่ครบหลัก, มีตัวอักษรปน, รหัสไปรษณีย์ไม่ตรงจังหวัด, วันที่ 31/04
+- **Seedable** ใส่ seed เดิมได้ข้อมูลชุดเดิม test fail แล้ว reproduce ได้
 - **Zero dependencies** และเขียนด้วย TypeScript แบบ strict
 
-## เริ่มต้นใช้งาน
+## Quick start
 
 ```bash
 npm install --save-dev thai-test-data
@@ -76,11 +76,11 @@ td.person();               // ชื่อ เลขบัตร เบอร์
 isValidThaiId("1-2345-67890-12-1"); // true
 ```
 
-ต้องใช้ Node.js 20 ขึ้นไป แพ็กเกจเป็น ES module
+ต้องใช้ Node.js 20 ขึ้นไป package เป็น ES module
 
-## ตัวอย่างการใช้งาน
+## Usage
 
-### Playwright: กรณีถูกและกรณีผิด
+### Playwright: positive และ negative test
 
 ```ts
 import { test, expect } from "@playwright/test";
@@ -108,14 +108,14 @@ for (const kind of ["checksum", "short", "long", "letters"] as const) {
 }
 ```
 
-### เตรียมข้อมูลหลายรายการ
+### เตรียม test data หลายรายการ
 
 ```ts
 const users = td.many(100, () => td.person("female"));
 const chiangMaiZips = td.many(20, () => td.postalCode({ province: "เชียงใหม่" }));
 ```
 
-### ตรวจข้อมูลที่ระบบตอบกลับมา
+### Assert ข้อมูลที่ API ตอบกลับมา
 
 ```ts
 import { isValidMobilePhone, lookupPostalCode } from "thai-test-data";
@@ -126,11 +126,11 @@ expect(lookupPostalCode(response.zip).map((l) => l.province)).toContain(response
 
 ## API Reference
 
-สร้างตัวสุ่มด้วย `createThaiData({ seed? })` แล้วเรียกเมธอดผ่านตัวแปรที่ได้ (ในตัวอย่างใช้ชื่อ `td`)
+สร้าง generator ด้วย `createThaiData({ seed? })` แล้วเรียก method จาก instance ที่ได้ (ในตัวอย่างใช้ชื่อ `td`)
 
-### ข้อมูลที่ถูกต้อง
+### Valid data
 
-| เมธอด | ผลลัพธ์ |
+| Method | Returns |
 |---|---|
 | `td.citizenId(firstDigit?)` | เลขบัตรประชาชน 13 หลัก กำหนดหลักแรก 1–8 ได้ |
 | `td.juristicId()` | เลขผู้เสียภาษีนิติบุคคล ขึ้นต้นด้วย 0 |
@@ -138,49 +138,49 @@ expect(lookupPostalCode(response.zip).map((l) => l.province)).toContain(response
 | `td.name(gender?)` | ชื่อไทยและอังกฤษ พร้อมคำนำหน้า |
 | `td.address(options?)` | ที่อยู่ กรองได้ด้วย `{ province }` หรือ `{ bangkok }` |
 | `td.postalCode(options?)` | รหัสไปรษณีย์ที่มีใช้จริง กรองได้เหมือน `address` |
-| `td.birthDate(minAge?, maxAge?)` | `Date` ของวันเกิดตามช่วงอายุ (ค่าเริ่มต้น 18–65) |
+| `td.birthDate(minAge?, maxAge?)` | `Date` ของวันเกิดตามช่วงอายุ (default 18–65) |
 | `td.person(gender?)` | ข้อมูลบุคคลครบชุด |
-| `td.many(count, factory)` | เรียก `factory` ซ้ำ `count` ครั้ง |
-| `td.random` | ตัวสุ่มที่ใช้ seed เดียวกัน สำหรับสร้างข้อมูลแบบของตัวเอง |
+| `td.many(count, factory)` | เรียก `factory` ซ้ำ `count` ครั้ง แล้วคืนเป็น array |
+| `td.random` | random function ที่ใช้ seed เดียวกัน สำหรับ generate ข้อมูลแบบของตัวเอง |
 
-### ข้อมูลที่ผิด (negative cases)
+### Invalid data (negative cases)
 
-| เมธอด | `kind` ที่เลือกได้ (ตัวแรกคือค่าเริ่มต้น) |
+| Method | `kind` (ตัวแรกคือ default) |
 |---|---|
 | `td.invalidCitizenId(kind?)` | `"checksum"`, `"short"` (12 หลัก), `"long"` (14 หลัก), `"letters"` |
 | `td.invalidJuristicId(kind?)` | เหมือน `invalidCitizenId` |
 | `td.invalidPhone(kind?)` | `"prefix"` (เช่น 02), `"short"`, `"long"`, `"letters"` |
 | `td.invalidPostalCode(kind?)` | `"unknown"` (5 หลักแต่ไม่มีจริง), `"short"`, `"long"`, `"letters"` |
 
-### ฟังก์ชันตรวจและจัดรูปแบบ
+### Validators และ formatters
 
-| ฟังก์ชัน | หน้าที่ |
+| Function | Description |
 |---|---|
-| `isValidThaiId(value)` | ตรวจเลข 13 หลัก (ไม่สนขีดและช่องว่าง) |
+| `isValidThaiId(value)` | validate เลข 13 หลัก (ไม่สนขีดและช่องว่าง) |
 | `thaiIdCheckDigit(first12)` | คำนวณ check digit จาก 12 หลักแรก |
 | `formatThaiId(id)` | `1234567890121` → `1-2345-67890-12-1` |
-| `isValidMobilePhone(value)` | ตรวจเบอร์มือถือ 10 หลัก |
+| `isValidMobilePhone(value)` | validate เบอร์มือถือ 10 หลัก |
 | `formatPhone(phone)` / `toE164(phone)` | `081-234-5678` / `+66812345678` |
-| `isValidPostalCode(code)` | ตรวจว่ารหัสไปรษณีย์มีใช้จริง |
+| `isValidPostalCode(code)` | เช็กว่ารหัสไปรษณีย์มีใช้จริง |
 | `lookupPostalCode(code)` | รายการตำบล อำเภอ จังหวัด ที่ใช้รหัสนี้ |
 | `formatThaiDate(date)` / `formatThaiDateLong(date)` | `26/10/2569` / `26 ตุลาคม 2569` |
 | `formatIsoDate(date)` | `2026-10-26` ตามเวลาท้องถิ่น |
 | `toBuddhistYear(year)` / `toChristianYear(year)` | แปลง ค.ศ. ↔ พ.ศ. |
 | `ageOn(birth, today?)` | อายุเต็มปี |
 
-### ข้อมูลอ้างอิง
+### Reference data
 
-| ค่าคงที่ | เนื้อหา |
+| Constant | Contains |
 |---|---|
 | `PROVINCES` | ชื่อจังหวัดไทยและอังกฤษ 77 จังหวัด |
 | `LOCALITIES` | ตำบลทั้งหมด พร้อมอำเภอ จังหวัด และรหัสไปรษณีย์ |
 | `POSTAL_CODES` | รหัสไปรษณีย์ที่มีใช้ทั้งหมด |
 
-## โครงสร้างโปรเจกต์
+## Project structure
 
 ```
 thai-test-data/
-├── src/                     # ซอร์สของ library
+├── src/                     # library source
 │   ├── index.ts             # createThaiData() และ export ทั้งหมด
 │   ├── id.ts                # เลขบัตรประชาชน เลขนิติบุคคล check digit
 │   ├── phone.ts             # เบอร์มือถือ
@@ -188,15 +188,15 @@ thai-test-data/
 │   ├── address.ts           # ที่อยู่
 │   ├── postal.ts            # รหัสไปรษณีย์
 │   ├── date.ts              # วันที่ พ.ศ.
-│   ├── random.ts            # ตัวสุ่มแบบ seed ได้
-│   └── data/localities.ts   # ข้อมูลตำบล (สร้างจากสคริปต์ ห้ามแก้เอง)
+│   ├── random.ts            # seeded random
+│   └── data/localities.ts   # ข้อมูลตำบล (generated ห้ามแก้เอง)
 ├── test/                    # unit tests (Vitest)
 ├── site/index.html          # Web app (deploy บน Vercel)
-├── scripts/                 # สคริปต์สร้างข้อมูล
-└── docs/                    # รูปประกอบ README
+├── scripts/                 # build script และ dev server
+└── docs/                    # รูปใน README
 ```
 
-## พัฒนาในเครื่อง
+## Development
 
 ```bash
 git clone https://github.com/jodpacharapon/thai-test-data.git
@@ -204,15 +204,15 @@ cd thai-test-data
 npm install
 ```
 
-| คำสั่ง | หน้าที่ |
+| Command | Description |
 |---|---|
-| `npm test` | รัน unit tests |
-| `npm run typecheck` | ตรวจ type |
+| `npm test` | run unit tests |
+| `npm run typecheck` | type check |
 | `npm run build` | build library ไปที่ `dist/` |
-| `npm run site` | build library แล้วคัดลอกไปที่ `site/lib/` |
-| `npm run dev` | `site` แล้วเปิด web app ที่ http://localhost:8080 |
+| `npm run site` | build library แล้ว copy ไปที่ `site/lib/` |
+| `npm run dev` | build แล้ว serve web app ที่ http://localhost:8080 |
 
-## ข้อมูลที่อยู่
+## Address data
 
 ข้อมูลจังหวัด อำเภอ ตำบล และรหัสไปรษณีย์มาจาก
 [kongvut/thai-province-data](https://github.com/kongvut/thai-province-data)
@@ -220,7 +220,7 @@ npm install
 
 ข้อมูลผูกตำบลละ 1 รหัสไปรษณีย์ จึงอาจไม่มีรหัสเฉพาะของหน่วยงาน
 
-อัปเดตเป็นเวอร์ชันใหม่:
+Update เป็น version ใหม่:
 
 ```bash
 git clone --depth 1 https://github.com/kongvut/thai-province-data /tmp/thai-province-data
@@ -231,10 +231,10 @@ npm run build:data -- /tmp/thai-province-data/api/latest/province_with_district_
 
 ## Contributing
 
-ยินดีรับทั้ง issue และ pull request ครับ อ่านวิธีได้ที่ [CONTRIBUTING.md](CONTRIBUTING.md)
-ประวัติการเปลี่ยนแปลงอยู่ใน [CHANGELOG.md](CHANGELOG.md)
+ยินดีรับทั้ง issue และ pull request ครับ อ่าน guideline ได้ที่ [CONTRIBUTING.md](CONTRIBUTING.md)
+ดู release history ได้ที่ [CHANGELOG.md](CHANGELOG.md)
 
-ไอเดียที่น่าทำต่อ: เลขบัญชีธนาคาร, PromptPay, ทะเบียนรถ, เลขพาสปอร์ต, CLI, Python และ Robot Framework
+Roadmap ideas: เลขบัญชีธนาคาร, PromptPay, ทะเบียนรถ, เลขพาสปอร์ต, CLI, Python และ Robot Framework
 
 ## Disclaimer
 
