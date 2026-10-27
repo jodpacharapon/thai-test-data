@@ -1,6 +1,7 @@
 // Room for the data: fold the type list into a thin rail (remembered), or show the result
 // sheet full screen with only the data, filters and exports (Esc or the button again to leave).
 import { $ } from "../core/dom.js";
+import { onViewShown } from "../core/views.js";
 
 const COLLAPSED_KEY = "typesCollapsed";
 
@@ -32,6 +33,6 @@ export function initLayout() {
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && sheet.classList.contains("focus") && !e.defaultPrevented) setFocus(false);
   });
-  // Leaving the Generator (another tab in the app bar) closes full screen.
-  window.addEventListener("hashchange", () => setFocus(false));
+  // Leaving the Generator (another page in the app bar) closes full screen.
+  onViewShown((view) => { if (view !== "generate") setFocus(false); });
 }

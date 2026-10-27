@@ -3,21 +3,22 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Thai Test Data</title>
-<meta name="description" content="สร้างข้อมูลทดสอบภาษาไทยที่ valid จริง: เลขบัตรประชาชน เบอร์มือถือ ชื่อ ที่อยู่ วันที่ พ.ศ.">
+<!-- page-meta: title, description, canonical, Open Graph and structured data, written per page by scripts/build.mjs -->
+<meta name="theme-color" content="#22336b">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles/tokens.css">
-<link rel="stylesheet" href="styles/base.css">
-<link rel="stylesheet" href="styles/generator.css">
-<link rel="stylesheet" href="styles/validator.css">
-<link rel="stylesheet" href="styles/pages.css">
+<link rel="stylesheet" href="/styles/tokens.css">
+<link rel="stylesheet" href="/styles/base.css">
+<link rel="stylesheet" href="/styles/generator.css">
+<link rel="stylesheet" href="/styles/validator.css">
+<link rel="stylesheet" href="/styles/pages.css">
 </head>
 <body>
 <header class="bar">
   <div class="wrap">
-    <a class="brand" href="#generate">
+    <a class="brand" href="/">
       <svg width="30" height="22" viewBox="0 0 30 22" aria-hidden="true">
         <rect x="1" y="1" width="28" height="20" rx="3" fill="none" stroke="var(--navy)" stroke-width="2"/>
         <circle cx="9" cy="9" r="3" fill="var(--navy)"/>
@@ -29,10 +30,10 @@
       Thai Test Data
     </a>
     <nav class="tabs" aria-label="เมนูหลัก">
-      <a href="#generate" data-view="generate">Generator</a>
-      <a href="#validate" data-view="validate">Validator</a>
-      <a href="#docs" data-view="docs">Docs</a>
-      <a href="#report" data-view="report">Report</a>
+      <a href="/" data-view="generate">Generator</a>
+      <a href="/validator" data-view="validate">Validator</a>
+      <a href="/docs" data-view="docs">Docs</a>
+      <a href="/report" data-view="report">Report</a>
     </nav>
     <div class="bar-actions">
       <button class="tool-btn" id="themeBtn" type="button" aria-label="สลับธีมสว่าง/มืด" title="สลับธีม">
@@ -290,11 +291,11 @@ test("ปฏิเสธเลขบัตรที่ผิด", async ({ page 
       <p>ข้อมูลทั้งหมดเป็นข้อมูลสังเคราะห์ที่สุ่มในเบราว์เซอร์ของคุณ ไม่มีการส่งหรือเก็บไว้ที่ใด ใช้เพื่อทดสอบระบบเท่านั้น เลขที่สุ่มอาจบังเอิญตรงกับบุคคลจริง ห้ามนำไปใช้สมัครบริการจริงหรือแอบอ้างตัวตน</p>
       <p lang="en">All data is synthetic and generated in your browser; nothing is sent or stored. For software testing only. A generated number may match a real person by chance. Do not use it to register for real services or to impersonate anyone. Provided "as is" under the MIT License.</p>
     </div>
-    <p>MIT License · <a href="https://github.com/jodpacharapon/thai-test-data" target="_blank" rel="noopener">GitHub</a> · <a href="#report">Report a bug</a></p>
+    <p>MIT License · <a href="https://github.com/jodpacharapon/thai-test-data" target="_blank" rel="noopener">GitHub</a> · <a href="/report">Report a bug</a></p>
   </div>
 </footer>
 <div class="toast" id="toast" role="status"></div>
 
-<script type="module" src="src/main.js"></script>
+<script type="module" src="/src/main.js"></script>
 </body>
 </html>

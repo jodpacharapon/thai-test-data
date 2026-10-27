@@ -10,9 +10,9 @@ Realistic, valid Thai test data for QA and test automation, with negative cases 
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6)
 ![Zero dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)
 
-[**Web app**](https://thai-test-data.vercel.app) · [**Docs**](https://thai-test-data.vercel.app/#docs) · [Report a bug](https://thai-test-data.vercel.app/#report) · [Request a data type](https://github.com/jodpacharapon/thai-test-data/issues/new?template=feature_request.yml)
+[**Web app**](https://thai-test-data.vercel.app) · [**Docs**](https://thai-test-data.vercel.app/docs) · [Validator](https://thai-test-data.vercel.app/validator) · [Report a bug](https://thai-test-data.vercel.app/report) · [Request a data type](https://github.com/jodpacharapon/thai-test-data/issues/new?template=feature_request.yml)
 
-<img src="https://raw.githubusercontent.com/jodpacharapon/thai-test-data/main/docs/screenshot.png" alt="Generator: เลขบัตรประชาชนแบบ mixed valid/invalid พร้อม expected result ทุกแถว" width="860">
+<img src="https://raw.githubusercontent.com/jodpacharapon/thai-test-data/main/docs/screenshot.png" alt="Generator: เลขบัตรประชาชนแบบ Mixed ทั้ง valid และ invalid พร้อม expected result ทุกแถว" width="860">
 
 </div>
 
@@ -56,6 +56,15 @@ Thai Test Data generate ข้อมูลที่ผ่าน validation ไ�
 - **Negative cases ทุก data type** เช่น check digit ผิด, ไม่ครบหลัก, มีตัวอักษรปน, รหัสไปรษณีย์ไม่ตรงจังหวัด, วันที่ 31/04
 - **Seedable** ใส่ seed เดิมได้ข้อมูลชุดเดิม test fail แล้ว reproduce ได้
 - **Zero dependencies** และเขียนด้วย TypeScript แบบ strict
+
+### Web app
+
+- **Generate ได้สูงสุด 100,000 รายการ** เลื่อนดูได้ลื่นทุกแถว เลือก **Unique** เพื่อไม่ให้มีค่าซ้ำ
+- **ตัวกรองผลลัพธ์** ค้นหาด้วยข้อความหรือ regex, กรอง Valid / Invalid และกรองตามสาเหตุที่ invalid
+- **คัดลอกได้ทุกระดับ** คลิกช่องเพื่อคัดลอกค่าเดียว, ปุ่มท้ายแถวคัดลอกทั้งแถวเป็น JSON, หรือส่งออกทั้งชุดเป็น CSV / JSON
+- **โหมดเต็มจอ** พับเมนูซ้ายได้ ย้ายคอลัมน์ด้วยการลากหัวคอลัมน์ และปรับความกว้างได้ ไม่ต้องเลื่อนซ้าย-ขวา
+- **[Validator](https://thai-test-data.vercel.app/validator)** แบบ regex tester ตรวจได้ทีละหลายบรรทัด บอกเหตุผลและวิธีคำนวณ check digit
+- ทุกอย่างทำงานในเบราว์เซอร์ ไม่มีการส่งข้อมูลไปที่ไหน
 
 ## Quick start
 
@@ -208,8 +217,9 @@ thai-test-data/
 │       │   ├── validator/       # กฎตรวจแต่ละแบบ และหน้า regex tester
 │       │   └── report/          # ฟอร์มเปิด GitHub issue
 │       ├── styles/              # tokens, base, generator, validator, pages
+│       ├── static/              # favicon และรูป preview ตอนแชร์ลิงก์ (og.png)
 │       ├── test/                # unit tests ของ web app (node:test)
-│       └── scripts/             # build และ dev server
+│       └── scripts/             # build (HTML ต่อหน้า, sitemap.xml, robots.txt) และ dev server
 ├── docs/                        # รูปใน README
 └── vercel.json                  # build web app จาก root
 ```
@@ -232,6 +242,8 @@ npm install
 | `npm run build` | build library ไปที่ `packages/thai-test-data/dist/` |
 | `npm run build:web` | build library แล้วรวมกับ web app ไปที่ `apps/web/dist/` |
 | `npm run dev` | build แล้ว serve web app ที่ http://localhost:8080 |
+
+หน้าของ web app (URL, title และ description) กำหนดไว้ที่ [`apps/web/src/core/pages.js`](apps/web/src/core/pages.js) ตอน build จะสร้าง HTML แยกต่อหน้าพร้อม meta tags สำหรับ SEO, `sitemap.xml` และ `robots.txt`
 
 ## Address data
 
