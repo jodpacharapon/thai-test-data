@@ -31,7 +31,7 @@ check digits, mobile numbers, Thai/English names, consistent addresses, and Budd
 | เบอร์มือถือ | `td.phone()` หรือจำกัดเลขขึ้นต้น `td.phone(["08"])` |
 | เบอร์มือถือ (invalid) | `td.invalidPhone("prefix" \| "short" \| "long" \| "letters")` |
 | ชื่อ-นามสกุล ไทย/อังกฤษ | `td.name("male" \| "female")` |
-| ที่อยู่ (จังหวัด/อำเภอ/ตำบล/รหัสไปรษณีย์ตรงกัน) | `td.address()` |
+| ที่อยู่ ครบ 77 จังหวัด 7,436 ตำบล (จังหวัด/อำเภอ/ตำบล/รหัสไปรษณีย์ตรงกัน) | `td.address()` หรือ `td.address({ province: "เชียงใหม่" })` |
 | วันเกิดตามช่วงอายุ | `td.birthDate(18, 65)` |
 | บุคคลครบชุด | `td.person()` |
 
@@ -101,10 +101,23 @@ npm run site      # build แล้วเปิด site/index.html ผ่าน 
 
 ยินดีรับ Pull Request ครับ ไอเดียที่น่าทำ:
 
-- เพิ่มข้อมูลตำบลใน [`src/address.ts`](src/address.ts) (ตอนนี้มีตัวอย่าง 24 แห่ง)
 - เพิ่มชื่อ-นามสกุลใน [`src/name.ts`](src/name.ts)
 - เลขบัญชีธนาคาร, PromptPay, ทะเบียนรถ, เลขพาสปอร์ต
 - Python version, Robot Framework library, CLI
+
+## ข้อมูลที่อยู่ / Address data
+
+ข้อมูลจังหวัด อำเภอ ตำบล และรหัสไปรษณีย์มาจาก [kongvut/thai-province-data](https://github.com/kongvut/thai-province-data)
+(MIT License, Copyright (c) 2025 Kongvut Sangkla) ดูรายละเอียดใน [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
+
+อัปเดตข้อมูลเป็นเวอร์ชันใหม่:
+
+```bash
+git clone --depth 1 https://github.com/kongvut/thai-province-data /tmp/thai-province-data
+node scripts/build-localities.mjs /tmp/thai-province-data/api/latest/province_with_district_and_sub_district.json
+```
+
+แล้วแก้ `SOURCE_COMMIT` ใน `scripts/build-localities.mjs` ให้ตรงกับ commit ที่ใช้
 
 ## Disclaimer / ข้อจำกัดความรับผิด
 

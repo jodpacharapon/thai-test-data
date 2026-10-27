@@ -2,13 +2,13 @@ import { seededRng, type Rng } from "./random.js";
 import { breakThaiId, citizenId, invalidCitizenId, juristicId, type InvalidIdKind } from "./id.js";
 import { invalidMobilePhone, mobilePhone, type InvalidPhoneKind, type MobilePrefix } from "./phone.js";
 import { personName, type Gender, type PersonName } from "./name.js";
-import { address, type Address } from "./address.js";
+import { address, type Address, type AddressOptions } from "./address.js";
 import { birthDate, formatIsoDate, formatThaiDate } from "./date.js";
 
 export * from "./id.js";
 export * from "./phone.js";
 export * from "./date.js";
-export { LOCALITIES, type Address } from "./address.js";
+export { LOCALITIES, PROVINCES, type Address, type AddressOptions, type Locality } from "./address.js";
 export type { Gender, PersonName } from "./name.js";
 export { seededRng, type Rng } from "./random.js";
 
@@ -44,7 +44,8 @@ export function createThaiData(options: ThaiDataOptions = {}) {
     /** The underlying random source, for building your own variations with the same seed. */
     random: rng,
     name: (gender?: Gender) => personName(rng, gender),
-    address: () => address(rng),
+    /** Address whose subdistrict, district, province and postal code belong together. */
+    address: (options?: AddressOptions) => address(rng, options),
     birthDate: (minAge?: number, maxAge?: number) => birthDate(rng, minAge, maxAge),
     person: (gender?: Gender): Person => {
       const name = personName(rng, gender);

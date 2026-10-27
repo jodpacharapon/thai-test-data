@@ -329,7 +329,7 @@ test("ปฏิเสธเลขบัตรที่ผิด", async ({ page 
             <tr><td>td.phone(prefixes?)</td><td>เบอร์มือถือ 10 หลัก จำกัดเลขขึ้นต้นได้ เช่น ["08"]</td></tr>
             <tr><td>td.invalidPhone(kind?)</td><td>เบอร์ที่ผิด: "prefix" | "short" | "long" | "letters"</td></tr>
             <tr><td>td.name("male" | "female")</td><td>ชื่อ-นามสกุลไทยและอังกฤษ</td></tr>
-            <tr><td>td.address()</td><td>ที่อยู่ที่จังหวัด อำเภอ ตำบล รหัสไปรษณีย์ตรงกัน</td></tr>
+            <tr><td>td.address(options?)</td><td>ที่อยู่ครบ 77 จังหวัด 7,436 ตำบล รหัสไปรษณีย์ตรงกัน กรองได้ เช่น { province: "เชียงใหม่" } หรือ { bangkok: false }</td></tr>
             <tr><td>td.birthDate(min, max)</td><td>วันเกิดตามช่วงอายุ</td></tr>
             <tr><td>td.person()</td><td>ข้อมูลบุคคลครบชุด</td></tr>
             <tr><td>td.many(n, fn)</td><td>สร้างทีละหลายรายการ</td></tr>
@@ -353,7 +353,7 @@ test("ปฏิเสธเลขบัตรที่ผิด", async ({ page 
 <div class="toast" id="toast" role="status"></div>
 
 <script type="module">
-  import { createThaiData, seededRng, breakThaiId, isValidThaiId, thaiIdCheckDigit, formatThaiId, formatPhone, toE164 } from "./lib/index.js";
+  import { createThaiData, seededRng, breakThaiId, LOCALITIES, PROVINCES, isValidThaiId, thaiIdCheckDigit, formatThaiId, formatPhone, toE164 } from "./lib/index.js";
 
   const $ = (id) => document.getElementById(id);
 
@@ -418,6 +418,8 @@ test("ปฏิเสธเลขบัตรที่ผิด", async ({ page 
   ];
 
   const pickOne = (rng, arr) => arr[Math.floor(rng() * arr.length)];
+  const ROAD_EN = { "ถนนสุขุมวิท": "Sukhumvit Rd.", "ถนนพหลโยธิน": "Phahonyothin Rd.", "ถนนเพชรบุรี": "Phetchaburi Rd.", "ถนนรามคำแหง": "Ramkhamhaeng Rd.",
+    "ถนนเจริญกรุง": "Charoen Krung Rd.", "ถนนมิตรภาพ": "Mittraphap Rd.", "ถนนเพชรเกษม": "Phetkasem Rd.", "ถนนสุดบรรทัด": "Sut Banthat Rd." };
   // Decide whether this row is a negative case, and which kind.
   function caseFor(o, rng) {
     const kinds = o.bad && o.bad.length ? o.bad : null;
@@ -498,18 +500,47 @@ test("ปฏิเสธเลขบัตรที่ผิด", async ({ page 
         const note = { noAt: "ไม่มี @", noDomain: "ไม่มีโดเมน", space: "มีช่องว่าง", doubleAt: "มี @ สองตัว" }[bad];
         return { value: v, ok: false, note };
       } },
-    { key: "address", group: "address", title: "ที่อยู่", desc: "จังหวัด อำเภอ ตำบล และรหัสไปรษณีย์ตรงกันจริง", keys: "address บ้าน province district zip postal จังหวัด อำเภอ ตำบล รหัสไปรษณีย์",
-      controls: [
-        { id: "format", label: "รูปแบบ", kind: "seg", choices: [["full", "บรรทัดเดียว"], ["parts", "แยกช่อง"]], def: "full" },
-        { id: "region", label: "พื้นที่", kind: "seg", choices: [["any", "ทั้งหมด"], ["bkk", "กรุงเทพฯ"], ["upcountry", "ต่างจังหวัด"]], def: "any" },
+    { key: "address", group: "address", title: "ที่อยู่", desc: "ครบทุกตำบลทั่วประเทศ จังหวัด อำเภอ ตำบล และรหัสไปรษณีย์ตรงกันจริง", keys: "address บ้าน province district zip postal จังหวัด อำเภอ ตำบล รหัสไปรษณีย์ english",
+      controls: [CASE,
+        { id: "bad", label: "ข้อมูลผิดแบบไหน", kind: "checks", when: (o) => o.case !== "valid",
+          choices: [["zip", "รหัสไปรษณีย์ไม่ตรงพื้นที่"], ["zipShort", "รหัสไปรษณีย์ไม่ครบ 5 หลัก"], ["district", "อำเภอไม่อยู่ในจังหวัดนี้"]], def: ["zip", "district"] },
+        { id: "format", label: "รูปแบบ", kind: "seg", choices: [["full", "บรรทัดเดียว"], ["parts", "แยกช่อง"], ["en", "ภาษาอังกฤษ"]], def: "full" },
+        { id: "province", label: "จังหวัด", kind: "select", def: "any",
+          choices: [["any", "ทุกจังหวัด"], ["upcountry", "ทุกจังหวัดยกเว้นกรุงเทพฯ"], ...PROVINCES.map((p) => [p.th, p.th])] },
         { id: "extra", label: "ใส่เพิ่ม", kind: "checks", choices: [["road", "ถนน"], ["moo", "หมู่ (ต่างจังหวัด)"]], def: ["road", "moo"] }],
-      gen: (td, o) => {
-        let a = td.address();
-        for (let i = 0; i < 200 && o.region !== "any" && (a.provinceEn === "Bangkok") !== (o.region === "bkk"); i++) a = td.address();
+      gen: (td, o, rng) => {
+        const opts = o.province === "any" ? {} : o.province === "upcountry" ? { bangkok: false } : { province: o.province };
+        const a = { ...td.address(opts) };
+        const bad = caseFor(o, rng);
+        let note = "";
+        if (bad === "zip") {
+          // A real postal code from another province, so it still looks plausible.
+          let other = pickOne(rng, LOCALITIES);
+          while (other.province === a.province || other.postalCode === a.postalCode) other = pickOne(rng, LOCALITIES);
+          a.postalCode = other.postalCode;
+          note = `รหัส ${other.postalCode} เป็นของ${other.province}`;
+        } else if (bad === "zipShort") {
+          a.postalCode = a.postalCode.slice(0, 4);
+          note = "รหัสไปรษณีย์ไม่ครบ 5 หลัก";
+        } else if (bad === "district") {
+          let other = pickOne(rng, LOCALITIES);
+          while (other.province === a.province) other = pickOne(rng, LOCALITIES);
+          a.district = other.district;
+          a.districtEn = other.districtEn;
+          note = `${other.district} อยู่ใน${other.province}`;
+        }
         const road = o.extra.includes("road") ? a.road : "";
         const moo = o.extra.includes("moo") && a.moo ? a.moo : "";
-        if (o.format === "parts") return { "บ้านเลขที่": a.houseNo, "หมู่": moo || "-", "ถนน": road || "-", "ตำบล/แขวง": a.subdistrict, "อำเภอ/เขต": a.district, "จังหวัด": a.province, "รหัสไปรษณีย์": a.postalCode };
-        return [a.houseNo, moo && `หมู่ ${moo}`, road, a.subdistrict, a.district, a.province, a.postalCode].filter(Boolean).join(" ");
+        let value;
+        if (o.format === "parts") {
+          value = { "บ้านเลขที่": a.houseNo, "หมู่": moo || "-", "ถนน": road || "-", "ตำบล/แขวง": a.subdistrict, "อำเภอ/เขต": a.district, "จังหวัด": a.province, "รหัสไปรษณีย์": a.postalCode };
+        } else if (o.format === "en") {
+          const bkk = a.provinceEn === "Bangkok";
+          value = [a.houseNo + (moo ? ` Moo ${moo}` : ""), road && ROAD_EN[road], `${bkk ? "Khwaeng" : "Tambon"} ${a.subdistrictEn}`, `${bkk ? "Khet" : "Amphoe"} ${a.districtEn}`, `${a.provinceEn} ${a.postalCode}`].filter(Boolean).join(", ");
+        } else {
+          value = [a.houseNo, moo && `หมู่ ${moo}`, road, a.subdistrict, a.district, a.province, a.postalCode].filter(Boolean).join(" ");
+        }
+        return { value, ok: !bad, note };
       } },
     { key: "birth", group: "date", title: "วันเกิด", desc: "เลือกช่วงอายุและรูปแบบ พ.ศ. หรือ ค.ศ. ได้", keys: "birth date วันเกิด พ.ศ. ค.ศ. iso buddhist",
       controls: [CASE,
@@ -683,9 +714,11 @@ test("ปฏิเสธเลขบัตรที่ผิด", async ({ page 
     generate();
   }
 
-  // Results
-  const isRecord = (v) => v && typeof v === "object" && !("value" in v);
-  const plain = (v) => (v && typeof v === "object" && "value" in v ? v.value : v);
+  // Results. Generators return a plain value, or { value, ok, note } for test cases.
+  const norm = (it) => (it && typeof it === "object" && "value" in it ? it : { value: it });
+  const hasCase = () => values.length > 0 && values[0].ok !== undefined;
+  const isTable = () => values.length > 0 && typeof values[0].value === "object";
+  const statusText = (r) => (r.ok ? "ถูก" : "ผิด · " + r.note);
 
   function generate() {
     const count = Math.min(500, Math.max(1, Number($("count").value) || 1));
@@ -693,51 +726,57 @@ test("ปฏิเสธเลขบัตรที่ผิด", async ({ page 
     const td = createThaiData(seedVal === "" ? {} : { seed: Number(seedVal) });
     const rng = seedVal === "" ? Math.random : seededRng(Number(seedVal) + 7919);
     const o = settings[current.key];
-    values = Array.from({ length: count }, () => current.gen(td, o, rng));
+    values = Array.from({ length: count }, () => norm(current.gen(td, o, rng)));
     const result = $("result");
     result.replaceChildren();
+    const bad = values.filter((r) => r.ok === false).length;
+    const tally = hasCase() ? ` · ถูก ${count - bad} ผิด ${bad}` : "";
 
-    if (isRecord(values[0])) {
-      const cols = Object.keys(values[0]);
+    if (isTable()) {
+      const cols = Object.keys(values[0].value);
       const wrap = document.createElement("div");
       wrap.className = "table-wrap";
       const table = document.createElement("table");
       const head = table.createTHead().insertRow();
-      ["#", ...cols].forEach((c) => { const th = document.createElement("th"); th.textContent = c; head.appendChild(th); });
+      ["#", ...cols, ...(hasCase() ? ["ผล"] : [])].forEach((c) => { const th = document.createElement("th"); th.textContent = c; head.appendChild(th); });
       const body = table.createTBody();
-      values.forEach((v, i) => {
+      values.forEach((r, i) => {
         const tr = body.insertRow();
         tr.insertCell().textContent = i + 1;
         cols.forEach((c) => {
           const cell = tr.insertCell();
-          cell.textContent = v[c];
-          if (/^[\d+\-/]+$/.test(String(v[c]))) cell.className = "mono";
+          cell.textContent = r.value[c];
+          if (/^[\d+\-/]+$/.test(String(r.value[c]))) cell.className = "mono";
         });
+        if (hasCase()) {
+          const st = document.createElement("span");
+          st.className = "st " + (r.ok ? "ok" : "bad");
+          st.textContent = statusText(r);
+          tr.insertCell().appendChild(st);
+        }
       });
       wrap.appendChild(table);
       result.appendChild(wrap);
-      $("sheetFoot").textContent = `${count} รายการ · ใช้ปุ่ม JSON หรือ CSV เพื่อคัดลอกทั้งตาราง`;
+      $("sheetFoot").textContent = `${count} รายการ${tally} · ใช้ปุ่ม JSON หรือ CSV เพื่อคัดลอกทั้งตาราง`;
       return;
     }
 
     const list = document.createElement("ol");
     list.className = "rows";
-    let bad = 0;
-    values.forEach((item) => {
-      const v = plain(item);
+    values.forEach((r) => {
+      const v = r.value;
       const li = document.createElement("li");
       li.className = "row";
       li.tabIndex = 0;
       li.innerHTML = '<span class="val"></span><span class="st"></span><span class="hint">คัดลอก</span>';
       const val = li.querySelector(".val");
       val.textContent = v.trim() === "" ? `"${v}"` : v;
-      if (/[ก-๙]/.test(v) && !/^\d/.test(v)) val.classList.add("text");
-      const st = li.querySelector(".st");
-      if (typeof item === "object") {
-        st.classList.add(item.ok ? "ok" : "bad");
-        st.textContent = item.ok ? "ถูก" : "ผิด · " + item.note;
-        st.title = item.ok ? item.note : "";
-        if (!item.ok) bad++;
+      if (/[ก-๙]/.test(v) && !/^\d/.test(v) || /, /.test(v)) val.classList.add("text");
+      if (r.ok !== undefined) {
+        const st = li.querySelector(".st");
+        st.classList.add(r.ok ? "ok" : "bad");
+        st.textContent = statusText(r);
+        if (r.ok) st.title = r.note;
       }
       const doCopy = async () => {
         if (!(await copy(v, "คัดลอกแล้ว"))) return;
@@ -750,25 +789,25 @@ test("ปฏิเสธเลขบัตรที่ผิด", async ({ page 
       list.appendChild(li);
     });
     result.appendChild(list);
-    const tally = typeof values[0] === "object" ? ` · ถูก ${count - bad} ผิด ${bad}` : "";
     $("sheetFoot").textContent = `${count} รายการ${tally} · คลิกแถวเพื่อคัดลอกค่านั้น`;
   }
 
   const toCsv = () => {
     const esc = (s) => `"${String(s).replace(/"/g, '""')}"`;
-    if (isRecord(values[0])) {
-      const cols = Object.keys(values[0]);
-      return [cols.map(esc).join(","), ...values.map((v) => cols.map((c) => esc(v[c])).join(","))].join("\n");
+    const caseCols = hasCase() ? ["expected", "reason"] : [];
+    const caseVals = (r) => (hasCase() ? [r.ok ? "valid" : "invalid", r.ok ? "" : r.note] : []);
+    if (isTable()) {
+      const cols = Object.keys(values[0].value);
+      return [[...cols, ...caseCols].map(esc).join(","), ...values.map((r) => [...cols.map((c) => r.value[c]), ...caseVals(r)].map(esc).join(","))].join("\n");
     }
-    if (typeof values[0] === "object") return [["value", "expected", "reason"].map(esc).join(","), ...values.map((v) => [v.value, v.ok ? "valid" : "invalid", v.note].map(esc).join(","))].join("\n");
-    return ["value", ...values.map(esc)].join("\n");
+    return [["value", ...caseCols].map(esc).join(","), ...values.map((r) => [r.value, ...caseVals(r)].map(esc).join(","))].join("\n");
   };
-  const toJson = () => JSON.stringify(values.map((v) => (v && typeof v === "object" && "value" in v ? { value: v.value, expected: v.ok ? "valid" : "invalid", reason: v.note } : v)), null, 2);
+  const toJson = () => JSON.stringify(values.map((r) => (r.ok === undefined ? r.value : { value: r.value, expected: r.ok ? "valid" : "invalid", reason: r.ok ? "" : r.note })), null, 2);
 
   $("regen").addEventListener("click", generate);
   $("count").addEventListener("change", generate);
   $("seed").addEventListener("change", generate);
-  $("copyAll").addEventListener("click", () => copy(isRecord(values[0]) ? toCsv() : values.map(plain).join("\n"), `คัดลอก ${values.length} รายการแล้ว`));
+  $("copyAll").addEventListener("click", () => copy(isTable() ? toCsv() : values.map((r) => r.value).join("\n"), `คัดลอก ${values.length} รายการแล้ว`));
   $("copyJson").addEventListener("click", () => copy(toJson(), "คัดลอก JSON แล้ว"));
   $("dlCsv").addEventListener("click", () => {
     const a = document.createElement("a");

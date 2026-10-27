@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  ageOn, createThaiData, formatPhone, formatThaiDate, formatThaiDateLong, formatThaiId,
+  PROVINCES, ageOn, createThaiData, formatPhone, formatThaiDate, formatThaiDateLong, formatThaiId,
   isValidMobilePhone, isValidThaiId, LOCALITIES, thaiIdCheckDigit, toE164,
 } from "../src/index.js";
 
@@ -77,8 +77,8 @@ describe("address", () => {
   it("keeps province, district, subdistrict and postal code consistent", () => {
     for (const a of td.many(100, td.address)) {
       expect(LOCALITIES).toContainEqual({
-        province: a.province, provinceEn: a.provinceEn, district: a.district,
-        subdistrict: a.subdistrict, postalCode: a.postalCode,
+        province: a.province, provinceEn: a.provinceEn, district: a.district, districtEn: a.districtEn,
+        subdistrict: a.subdistrict, subdistrictEn: a.subdistrictEn, postalCode: a.postalCode,
       });
       expect(a.fullAddress).toContain(a.postalCode);
     }
@@ -144,5 +144,28 @@ describe("invalid variants", () => {
 
   it("limits phone prefixes", () => {
     for (const p of td.many(50, () => td.phone(["08"]))) expect(p.startsWith("08")).toBe(true);
+  });
+});
+
+describe("full locality data", () => {
+  it("covers every province and subdistrict", () => {
+    expect(PROVINCES).toHaveLength(77);
+    expect(LOCALITIES.length).toBeGreaterThan(7000);
+    for (const l of LOCALITIES) expect(l.postalCode).toMatch(/^\d{5}$/);
+  });
+
+  it("matches known postal codes", () => {
+    const find = (p: string, s: string) => LOCALITIES.find((l) => l.province === p && l.subdistrict === s)?.postalCode;
+    expect(find("กรุงเทพมหานคร", "แขวงพระบรมมหาราชวัง")).toBe("10200");
+    expect(find("เชียงใหม่", "ตำบลศรีภูมิ")).toBe("50200");
+    expect(find("ชลบุรี", "ตำบลหนองปรือ")).toBe("20150");
+  });
+
+  it("filters by province and Bangkok", () => {
+    for (const a of td.many(50, () => td.address({ province: "Chiang Mai" }))) expect(a.province).toBe("เชียงใหม่");
+    for (const a of td.many(50, () => td.address({ province: "ภูเก็ต" }))) expect(a.provinceEn).toBe("Phuket");
+    for (const a of td.many(50, () => td.address({ bangkok: true }))) expect(a.moo).toBeUndefined();
+    for (const a of td.many(50, () => td.address({ bangkok: false }))) expect(a.province).not.toBe("กรุงเทพมหานคร");
+    expect(() => td.address({ province: "Atlantis" })).toThrow();
   });
 });
