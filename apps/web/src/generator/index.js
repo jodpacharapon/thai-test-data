@@ -5,6 +5,7 @@ import { clampCount, generateRows } from "./rows.js";
 import { initTypeList } from "./type-list.js";
 import { renderConfig } from "./config-panel.js";
 import { createResults } from "./results.js";
+import { initLayout } from "./layout.js";
 
 // Settings per type, kept while switching between types.
 const settings = Object.fromEntries(TYPES.map((t) => [t.key, Object.fromEntries(t.controls.map((c) => [c.id, Array.isArray(c.def) ? [...c.def] : c.def]))]));
@@ -16,6 +17,7 @@ const readSeed = () => ($("seed").value === "" ? undefined : Number($("seed").va
 export function initGenerator() {
   const results = createResults({ fileName: () => `thai-test-data-${current.key}.csv` });
   const markSelected = initTypeList(select);
+  initLayout();
 
   function generate() {
     const count = clampCount($("count").value);

@@ -51,15 +51,18 @@
 <main>
   <!-- Generate -->
   <section class="view wrap" id="view-generate" aria-labelledby="typeTitle">
-    <div class="workspace">
-      <aside class="types">
+    <div class="workspace" id="workspace">
+      <aside class="types" id="types">
         <div class="types-search">
           <input id="q" type="search" placeholder="Search เช่น บัตร, เบอร์, zip" aria-label="Search data types" autocomplete="off">
+          <button class="collapse-types" id="collapseTypes" type="button" aria-controls="typeList" aria-expanded="true" title="พับรายการประเภทข้อมูล">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+          </button>
         </div>
         <div class="types-list" id="typeList" role="listbox" aria-label="Data types"></div>
       </aside>
 
-      <div class="sheet">
+      <div class="sheet" id="sheet">
         <div class="sheet-head">
           <h1 id="typeTitle"></h1>
           <p id="typeDesc"></p>
@@ -96,6 +99,11 @@
             ล้างตัวกรอง
           </button>
           <span class="spacer"></span>
+          <button class="btn focus-btn" id="focusView" type="button" aria-pressed="false" title="ดูข้อมูลเต็มจอ (Esc เพื่อออก)">
+            <svg class="i-expand" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
+            <svg class="i-shrink" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M3 8h5V3M21 8h-5V3M3 16h5v5M21 16h-5v5"/></svg>
+            <span class="focus-label">เต็มจอ</span>
+          </button>
           <button class="btn" id="copyAll" type="button">คัดลอกทั้งหมด</button>
           <button class="btn" id="copyJson" type="button">JSON</button>
           <button class="btn" id="dlCsv" type="button">CSV</button>
