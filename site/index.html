@@ -197,6 +197,7 @@
   footer { border-top: 1px solid var(--rule); color: var(--sub); font-size: 0.85rem; padding-block: 20px calc(20px + env(safe-area-inset-bottom, 0px)); }
   footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; }
   footer p { margin: 0; max-width: 70ch; }
+  footer .legal { display: flex; flex-direction: column; gap: 6px; }
 
   .toast { position: fixed; z-index: 40; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 6px);
     background: var(--ink); color: var(--paper); padding: 8px 14px; border-radius: 6px; font-size: 0.9rem; opacity: 0; pointer-events: none; transition: opacity .15s, transform .15s; }
@@ -342,7 +343,10 @@ test("ปฏิเสธเลขบัตรที่ผิด", async ({ page 
 
 <footer>
   <div class="wrap">
-    <p>ข้อมูลทั้งหมดสุ่มในเบราว์เซอร์ของคุณ ไม่มีการส่งหรือเก็บไว้ที่ใด ใช้เพื่อทดสอบระบบเท่านั้น เลขที่สุ่มอาจบังเอิญตรงกับบุคคลจริง ห้ามนำไปใช้สมัครบริการจริงหรือแอบอ้างตัวตน</p>
+    <div class="legal">
+      <p>ข้อมูลทั้งหมดเป็นข้อมูลสังเคราะห์ที่สุ่มในเบราว์เซอร์ของคุณ ไม่มีการส่งหรือเก็บไว้ที่ใด ใช้เพื่อทดสอบระบบเท่านั้น เลขที่สุ่มอาจบังเอิญตรงกับบุคคลจริง ห้ามนำไปใช้สมัครบริการจริงหรือแอบอ้างตัวตน</p>
+      <p lang="en">All data is synthetic and generated in your browser; nothing is sent or stored. For software testing only. A generated number may match a real person by chance. Do not use it to register for real services or to impersonate anyone. Provided "as is" under the MIT License.</p>
+    </div>
     <p>MIT License · <a href="https://github.com/jodpacharapon/thai-test-data" target="_blank" rel="noopener">GitHub</a></p>
   </div>
 </footer>

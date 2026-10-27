@@ -106,7 +106,33 @@ npm run site      # build แล้วเปิด site/index.html ผ่าน 
 - เลขบัญชีธนาคาร, PromptPay, ทะเบียนรถ, เลขพาสปอร์ต
 - Python version, Robot Framework library, CLI
 
-> ข้อมูลทั้งหมดเป็นข้อมูลสุ่มเพื่อการทดสอบเท่านั้น เลขบัตรที่สร้างอาจบังเอิญตรงกับบุคคลจริงได้ ห้ามใช้ในทางที่ผิด
+## Disclaimer / ข้อจำกัดความรับผิด
+
+**English**
+
+- All data produced by this project is **synthetic** and randomly generated. It is not taken from any
+  real person, database or government record. Names are common Thai names combined at random, and
+  addresses use real localities that are not linked to any real household or person.
+- Generated ID numbers pass the public check-digit formula but are **not issued by any authority**.
+  A generated number may, by chance, match a number that belongs to a real person or company.
+- Use this data **only for software testing and development**, in test or staging environments.
+  Do not use it to register for real services, open accounts, create or alter identity documents,
+  or impersonate anyone. Doing so may be a criminal offence in Thailand and in your own country.
+- You are responsible for how you use this software and the data it produces, and for complying with
+  the laws that apply to you. The software is provided "as is", without warranty of any kind, as stated
+  in the [MIT License](LICENSE).
+
+**ภาษาไทย**
+
+- ข้อมูลทั้งหมดเป็น**ข้อมูลสังเคราะห์**ที่สุ่มขึ้น ไม่ได้นำมาจากบุคคล ฐานข้อมูล หรือทะเบียนราชการใด
+  ชื่อเป็นชื่อไทยทั่วไปที่สุ่มจับคู่กัน ที่อยู่ใช้ชื่อพื้นที่จริงแต่ไม่ได้ผูกกับบ้านหรือบุคคลใด
+- เลขที่สร้างผ่านสูตร check digit ที่เปิดเผยต่อสาธารณะ แต่**ไม่ได้ออกโดยหน่วยงานใด**
+  และอาจบังเอิญตรงกับเลขของบุคคลหรือนิติบุคคลจริงได้
+- ใช้เพื่อ**ทดสอบและพัฒนาซอฟต์แวร์เท่านั้น** ในระบบ test หรือ staging ห้ามนำไปสมัครบริการจริง เปิดบัญชี
+  ทำหรือแก้ไขเอกสารแสดงตน หรือแอบอ้างเป็นผู้อื่น ซึ่งอาจเป็นความผิดทางอาญาทั้งในประเทศไทยและประเทศของผู้ใช้
+- ผู้ใช้รับผิดชอบการใช้งานซอฟต์แวร์และข้อมูลที่ได้เอง รวมถึงการปฏิบัติตามกฎหมายที่เกี่ยวข้อง
+  ซอฟต์แวร์นี้ให้ใช้ตามสภาพ ("as is") โดยไม่มีการรับประกันใดๆ ตาม [MIT License](LICENSE)
+
 
 ## License
 
