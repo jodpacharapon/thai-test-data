@@ -1,0 +1,6 @@
+* text=auto eol=lf
+*.png binary
+
+# Generated data: collapse in diffs and leave out of language stats.
+src/data/localities.ts linguist-generated=true
+package-lock.json linguist-generated=true
