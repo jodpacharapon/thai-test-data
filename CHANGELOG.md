@@ -5,6 +5,10 @@ Format อ้างอิง [Keep a Changelog](https://keepachangelog.com/en/1.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-27
+
+Library API เหมือน 0.1.0 ทุกอย่าง ใช้แทนกันได้ทันที ส่วนที่เปลี่ยนคือ web app และโครงสร้าง repo
+
 ### Added
 
 - Web app: หน้า Report เปิด GitHub issue (bug report / feature request) พร้อมแนบ data type, settings และ seed ให้อัตโนมัติ
@@ -36,5 +40,6 @@ First release
 - Validator เลขบัตรพร้อมแสดงวิธีคำนวณ check digit และ validator รหัสไปรษณีย์
 - หน้า Docs, light/dark mode, responsive บนมือถือ
 
-[Unreleased]: https://github.com/jodpacharapon/thai-test-data/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/jodpacharapon/thai-test-data/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/jodpacharapon/thai-test-data/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/jodpacharapon/thai-test-data/releases/tag/v0.1.0
