@@ -1,5 +1,6 @@
 // The result sheet: filters (search, status, reason), page size + pager, export buttons,
-// and the virtualized list or table of rows.
+// and the virtualized rows: a list for single values, and for types with several fields a table
+// when it fits the width, or one card per row when it doesn't, so nothing needs sideways scrolling.
 import { $, el, fmt, copy, debounce, download, replaceKeepingFocus, segmented, toast } from "../core/dom.js";
 import { columnsOf, hasCase, isTable, statusText } from "./rows.js";
 import { filterRows, paginate } from "./filter.js";
@@ -13,7 +14,13 @@ const COPIED_MS = 1200;
 // Table cells: 14px padding each side + 1px border + a little slack for font rendering.
 const CELL_PADDING_PX = 34;
 const STATUS_CHIP_PX = 16;
+// Font size of table cells and card values (table in base.css, .rec-v in generator.css).
+const CELL_FONT_REM = 0.92;
 const MONO_CELL = /^[\d+\-/]+$/;
+// The # column: a mono digit at 0.78rem is about 0.47rem wide, plus padding (matches --num-w in CSS).
+const NUM_MIN_PX = 44;
+const NUM_DIGIT_REM = 0.47;
+const NUM_PADDING_PX = 26;
 const DEFAULT_FILTERS = Object.freeze({ query: "", isRegex: false, status: "all", reason: "all", pageSize: 100, page: 0 });
 
 const spacerHeight = (node) => (h) => { node.style.height = `${h}px`; };
@@ -30,6 +37,7 @@ export function createResults({ fileName }) {
   const table = el("table");
   const thead = table.createTHead();
   const tbody = table.createTBody();
+  let layout = "list"; // "list" | "table" | "cards"
   const listView = createVirtualList({
     scroller,
     body: list,
@@ -95,20 +103,27 @@ export function createResults({ fileName }) {
     $("resultEmpty").hidden = items.length > 0 || rows.length === 0;
     // Size the # column for the longest row number (e.g. "100,000"), so every row lines up and nothing is clipped.
     scroller.style.setProperty("--num-chars", String(fmt(rows.length).length));
-    if (isTable(rows)) {
+    layout = layoutFor();
+    list.classList.toggle("cards", layout === "cards");
+    if (layout === "table") {
       const cols = columnsOf(rows);
-      const headers = [...cols, ...(hasCase(rows) ? ["ผลที่ควรได้"] : [])];
       const head = el("tr");
-      ["#", ...headers].forEach((c) => head.append(el("th", { textContent: c })));
+      ["#", ...headersOf(cols)].forEach((c) => head.append(el("th", { textContent: c })));
       thead.replaceChildren(head);
       if (scroller.firstChild !== table) scroller.replaceChildren(table);
-      sizeColumns(cols, headers);
+      applyColumnWidths();
       listView.detach();
       tableView.set(items, (i) => tableRow(rows[i], i, cols));
     } else {
       if (scroller.firstChild !== list) scroller.replaceChildren(list);
       tableView.detach();
-      listView.set(items, (i) => listRow(rows[i], i));
+      if (layout === "cards") {
+        const cols = columnsOf(rows);
+        const headers = headersOf(cols);
+        listView.set(items, (i) => cardRow(rows[i], i, cols, headers));
+      } else {
+        listView.set(items, (i) => listRow(rows[i], i));
+      }
     }
     $("pager").hidden = pages <= 1;
     $("pageInfo").textContent = `หน้า ${fmt(page + 1)} / ${fmt(pages)}`;
@@ -122,27 +137,49 @@ export function createResults({ fileName }) {
     const parts = [isFiltered() ? `ตรงตัวกรอง ${fmt(n)} จาก ${fmt(rows.length)} แถว` : `${fmt(rows.length)} แถว`];
     if (shown && shown < n) parts.push(`แสดงแถว ${fmt(from + 1)}–${fmt(from + shown)}`);
     if (isFiltered()) parts.push("คัดลอกทั้งหมด, JSON และ CSV จะได้เฉพาะแถวที่ตรงตัวกรอง");
-    else parts.push(isTable(rows) ? "ใช้ปุ่ม JSON หรือ CSV เพื่อส่งออกทั้งตาราง" : "คลิกแถวเพื่อคัดลอก");
+    else parts.push(isTable(rows) ? "คลิกช่องเพื่อคัดลอก · ใช้ปุ่ม JSON หรือ CSV เพื่อส่งออกทั้งชุด" : "คลิกแถวเพื่อคัดลอก");
     $("sheetFoot").textContent = parts.join(" · ");
   }
 
-  // Fixed column widths from the longest value in each column (over all rows, not just the
-  // ones on screen), so full values show and columns stay put while scrolling.
+  const headersOf = (cols) => [...cols, ...(hasCase(rows) ? ["ผลที่ควรได้"] : [])];
+
+  // Table when every column fits at full width; otherwise cards, which wrap instead of scrolling sideways.
+  function layoutFor() {
+    if (!isTable(rows)) return "list";
+    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    const numW = Math.max(NUM_MIN_PX, fmt(rows.length).length * NUM_DIGIT_REM * rem + NUM_PADDING_PX);
+    const tableW = numW + widthsFor().reduce((a, b) => a + b, 0);
+    return tableW <= scroller.clientWidth ? "table" : "cards";
+  }
+
+  // Column widths from the longest value in each column (over all rows, not just the ones on
+  // screen), so full values show and columns stay put while scrolling. Cards use them too, as the
+  // starting width of each field.
   let sizedFor = null;
+  let widths = [];
   let measureCtx = null;
-  function sizeColumns(cols, headers) {
-    if (sizedFor === rows) return;
+  function widthsFor() {
+    if (sizedFor === rows) return widths;
     sizedFor = rows;
+    const cols = columnsOf(rows);
+    const headers = headersOf(cols);
     measureCtx ??= document.createElement("canvas").getContext("2d");
-    const cell = getComputedStyle(tbody);
-    const mono = getComputedStyle(document.documentElement).getPropertyValue("--font-mono");
+    // Read fonts from the root, not from a cell: the table may not be on the page yet (cards chosen first).
+    const root = getComputedStyle(document.documentElement);
+    const size = `${CELL_FONT_REM * parseFloat(root.fontSize)}px`;
+    const body = root.getPropertyValue("--font-body");
+    const mono = root.getPropertyValue("--font-mono");
     const measure = (text) => {
-      measureCtx.font = `${cell.fontSize} ${MONO_CELL.test(text) ? mono : cell.fontFamily}`;
+      measureCtx.font = `${size} ${MONO_CELL.test(text) ? mono : body}`;
       return measureCtx.measureText(text).width;
     };
     const columns = cols.map((c, k) => ({ header: headers[k], texts: rows.map((r) => String(r.value[c])) }));
     if (hasCase(rows)) columns.push({ header: headers.at(-1), texts: rows.map(statusText), extra: STATUS_CHIP_PX });
-    const widths = columnWidths(columns, measure, CELL_PADDING_PX).map((w, k) => w + (columns[k].extra ?? 0));
+    widths = columnWidths(columns, measure, CELL_PADDING_PX).map((w, k) => w + (columns[k].extra ?? 0));
+    return widths;
+  }
+
+  function applyColumnWidths() {
     const colgroup = el("colgroup", {}, el("col", { style: "width: var(--num-w)" }), ...widths.map((w) => el("col", { style: `width: ${w}px` })));
     table.querySelector("colgroup")?.remove();
     table.prepend(colgroup);
@@ -151,6 +188,8 @@ export function createResults({ fileName }) {
 
   // Widths measured before the web fonts arrive would be for the fallback font; measure again once they load.
   document.fonts?.ready.then(() => { if (isTable(rows)) { sizedFor = null; paintRows(); } });
+  // Switch between table and cards when the width changes (rotating a phone, resizing the window).
+  new ResizeObserver(() => { if (isTable(rows) && layoutFor() !== layout) paintRows(); }).observe(scroller);
 
   // Row builders. data-i is the index into `rows`, read by the delegated click handler.
   function listRow(r, i) {
@@ -171,13 +210,47 @@ export function createResults({ fileName }) {
 
   function tableRow(r, i, cols) {
     const tr = el("tr", {}, el("td", { textContent: fmt(i + 1) }));
+    tr.dataset.i = i;
     cols.forEach((c) => {
       const td = el("td", { textContent: r.value[c], title: r.value[c] });
+      td.dataset.c = c;
       if (MONO_CELL.test(String(r.value[c]))) td.className = "mono";
       tr.append(td);
     });
     if (hasCase(rows)) tr.append(el("td", {}, el("span", { className: "st " + (r.ok ? "ok" : "bad"), textContent: statusText(r) })));
     return tr;
+  }
+
+  // One card per row: each field is a label over its value. Fields start at their column's width and
+  // wrap onto the next line when the card is full, so a long address gets a line of its own.
+  function cardRow(r, i, cols, headers) {
+    const li = el("li", { className: "record" });
+    li.dataset.i = i;
+    const fields = el("div", { className: "rec-fields" });
+    cols.forEach((c, k) => {
+      const v = String(r.value[c]);
+      const field = el("div", { className: "rec-field", tabIndex: 0, title: "คลิกเพื่อคัดลอก" },
+        el("span", { className: "rec-k", textContent: headers[k] }),
+        el("span", { className: MONO_CELL.test(v) ? "rec-v mono" : "rec-v", textContent: v }));
+      field.dataset.c = c;
+      field.style.setProperty("--w", `${widths[k]}px`);
+      fields.append(field);
+    });
+    if (hasCase(rows)) {
+      fields.append(el("div", { className: "rec-field" },
+        el("span", { className: "rec-k", textContent: headers.at(-1) }),
+        el("span", { className: "st " + (r.ok ? "ok" : "bad"), textContent: statusText(r) })));
+    }
+    li.append(el("span", { className: "num", textContent: fmt(i + 1) }), fields);
+    return li;
+  }
+
+  // Click a table cell or card field to copy that one value.
+  async function copyField(node) {
+    const r = rows[Number(node.closest("[data-i]")?.dataset.i)];
+    if (!r || !(await copy(String(r.value[node.dataset.c]), "คัดลอกแล้ว"))) return;
+    node.classList.add("copied");
+    setTimeout(() => node.classList.remove("copied"), COPIED_MS);
   }
 
   async function copyRow(li) {
@@ -188,10 +261,12 @@ export function createResults({ fileName }) {
     hint.textContent = "✓";
     setTimeout(() => { li.classList.remove("copied"); hint.textContent = "คัดลอก"; }, COPIED_MS);
   }
-  list.addEventListener("click", (e) => { const li = e.target.closest(".row"); if (li) copyRow(li); });
-  list.addEventListener("keydown", (e) => {
-    const li = e.target.closest(".row");
-    if (li && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); copyRow(li); }
+  const target = (e) => e.target.closest(".rec-field[data-c], td[data-c], .row");
+  const activate = (node) => (node.classList.contains("row") ? copyRow(node) : copyField(node));
+  scroller.addEventListener("click", (e) => { const node = target(e); if (node) activate(node); });
+  scroller.addEventListener("keydown", (e) => {
+    const node = target(e);
+    if (node && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); activate(node); }
   });
 
   // Filter controls.

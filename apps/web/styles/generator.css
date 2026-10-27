@@ -75,7 +75,8 @@
 
 /* Virtualized rows: a fixed-height scroller; only the rows in view are in the DOM. */
 /* --num-chars is set from the row count; a mono digit at 0.78rem is about 0.47rem wide, plus 12px padding each side. */
-.result-scroll { --num-w: max(44px, calc(var(--num-chars, 3) * 0.47rem + 26px)); max-height: min(68vh, 760px); overflow: auto; overscroll-behavior: contain; position: relative; }
+.result-scroll { --num-w: max(44px, calc(var(--num-chars, 3) * 0.47rem + 26px)); max-height: min(68vh, 760px); overflow: auto; overscroll-behavior: contain; position: relative;
+  overflow-anchor: none; /* the virtual list keeps rows in place itself (virtual-list.js) */ }
 .result-scroll thead th { position: sticky; top: 0; z-index: 1; }
 .spacer td, li.spacer { padding: 0 !important; border: 0 !important; background: none !important; list-style: none; }
 
@@ -98,6 +99,25 @@
 .result-scroll td { overflow: hidden; text-overflow: ellipsis; }
 .result-scroll th:first-child, .result-scroll td:first-child { position: sticky; left: 0; z-index: 1; padding-right: 12px; }
 .result-scroll thead th:first-child { z-index: 2; }
+.result-scroll td[data-c] { cursor: pointer; transition: background var(--fast); }
+.result-scroll td[data-c]:hover { background: var(--well); }
+.result-scroll td.copied { background: var(--green-tint); }
+
+/* Cards: types with several fields, when the table would be wider than the sheet. Fields start at
+   their column's width (--w, from column-widths.js) and wrap, so values show in full without sideways scrolling. */
+.record { display: grid; grid-template-columns: var(--num-w) minmax(0, 1fr); border-bottom: 1px solid var(--rule); }
+.record .num { display: flex; justify-content: flex-end; padding: 12px 12px 0 0; border-right: 1px solid var(--rule); background: var(--well);
+  font: 0.78rem var(--font-mono); color: var(--sub); font-variant-numeric: tabular-nums; }
+.record .rec-fields { display: flex; flex-wrap: wrap; gap: 2px 4px; padding: 6px 8px; }
+.rec-field { display: flex; flex-direction: column; gap: 1px; flex: 1 1 var(--w, 160px); max-width: 100%; min-width: min(var(--w, 160px), 100%); padding: 4px 6px; border-radius: 4px;
+  transition: background var(--fast); }
+.rec-field[data-c] { cursor: pointer; }
+.rec-field[data-c]:hover { background: var(--well); }
+.rec-field.copied { background: var(--green-tint); }
+.rec-k { font: 600 0.7rem var(--font-head); letter-spacing: 0.04em; color: var(--sub); }
+.rec-v { font-size: 0.92rem; line-height: 1.45; overflow-wrap: anywhere; }
+.rec-v.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rec-field .st { align-self: flex-start; }
 
 @media (max-width: 820px) {
   .workspace { grid-template-columns: 1fr; }
