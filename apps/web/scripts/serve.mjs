@@ -13,7 +13,7 @@ createServer(async (req, res) => {
   const path = normalize(decodeURIComponent(new URL(req.url, "http://x").pathname)).replace(/^([/\\])+/, "");
   const file = join(root, path === "" || path.endsWith("/") ? join(path, "index.html") : path);
   if (!file.startsWith(root)) return res.writeHead(403).end();
-  // Like Vercel's cleanUrls: /docs serves docs.html.
+  // Like the rewrites in vercel.json: /docs serves docs.html.
   for (const candidate of extname(file) ? [file] : [file, `${file}.html`]) {
     try {
       const body = await readFile(candidate);
