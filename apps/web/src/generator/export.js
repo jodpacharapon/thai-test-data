@@ -14,8 +14,13 @@ export function toCsv(rows) {
   return [[...header, ...caseCols], ...rows.map((r) => [...cells(r), ...caseVals(r)])].map((line) => line.map(esc).join(",")).join("\n");
 }
 
-export const toJson = (rows) =>
-  JSON.stringify(rows.map((r) => (r.ok === undefined ? r.value : { value: r.value, expected: r.ok ? "valid" : "invalid", reason: r.ok ? "" : r.note })), null, 2);
+/** What one row looks like in JSON: the value itself, or with its expected result for types with negative cases. */
+const toJsonValue = (r) => (r.ok === undefined ? r.value : { value: r.value, expected: r.ok ? "valid" : "invalid", reason: r.ok ? "" : r.note });
+
+export const toJson = (rows) => JSON.stringify(rows.map(toJsonValue), null, 2);
+
+/** A single row as a JSON object, for the copy-row button. */
+export const rowToJson = (r) => JSON.stringify(toJsonValue(r), null, 2);
 
 /** One value per line; tables are copied as CSV so columns survive a paste into a sheet. */
 export const toText = (rows) => (isTable(rows) ? toCsv(rows) : rows.map((r) => r.value).join("\n"));

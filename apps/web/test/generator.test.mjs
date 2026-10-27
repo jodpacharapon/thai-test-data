@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { isValidThaiId } from "../dist/lib/index.js";
 import { TYPES } from "../dist/src/generator/types.js";
 import { clampCount, generateRows, MAX_COUNT } from "../dist/src/generator/rows.js";
-import { toCsv, toJson, toText } from "../dist/src/generator/export.js";
+import { rowToJson, toCsv, toJson, toText } from "../dist/src/generator/export.js";
 
 const citizen = TYPES.find((t) => t.key === "citizen");
 const defaults = (t) => Object.fromEntries(t.controls.map((c) => [c.id, Array.isArray(c.def) ? [...c.def] : c.def]));
@@ -58,4 +58,9 @@ test("JSON keeps plain values plain and adds expected for test cases", () => {
 test("text export is one value per line, or CSV for tables", () => {
   assert.equal(toText([{ value: "a" }, { value: "b" }]), "a\nb");
   assert.equal(toText([{ value: { x: "1" } }]), '"x"\n"1"');
+});
+
+test("rowToJson copies one row as an object, with its expected result when the type has one", () => {
+  assert.deepEqual(JSON.parse(rowToJson({ value: { ชื่อ: "ก", เลขบัตร: "1" } })), { ชื่อ: "ก", เลขบัตร: "1" });
+  assert.deepEqual(JSON.parse(rowToJson({ value: "b", ok: false, note: "short" })), { value: "b", expected: "invalid", reason: "short" });
 });

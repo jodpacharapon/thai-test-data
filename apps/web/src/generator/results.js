@@ -4,7 +4,7 @@
 import { $, el, fmt, copy, debounce, download, replaceKeepingFocus, segmented, toast } from "../core/dom.js";
 import { columnsOf, hasCase, isTable, statusText } from "./rows.js";
 import { filterRows, paginate } from "./filter.js";
-import { toCsv, toJson, toText } from "./export.js";
+import { rowToJson, toCsv, toJson, toText } from "./export.js";
 import { createVirtualList } from "./virtual-list.js";
 import { columnWidths } from "./column-widths.js";
 
@@ -16,6 +16,10 @@ const CELL_PADDING_PX = 34;
 const STATUS_CHIP_PX = 16;
 // Font size of table cells and card values (table in base.css, .rec-v in generator.css).
 const CELL_FONT_REM = 0.92;
+// Last table column, holding the copy-row button (matches .copy-row in generator.css).
+const COPY_COL_PX = 48;
+const COPY_ICON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">'
+  + '<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
 const MONO_CELL = /^[\d+\-/]+$/;
 // The # column: a mono digit at 0.78rem is about 0.47rem wide, plus padding (matches --num-w in CSS).
 const NUM_MIN_PX = 44;
@@ -109,6 +113,9 @@ export function createResults({ fileName }) {
       const cols = columnsOf(rows);
       const head = el("tr");
       ["#", ...headersOf(cols)].forEach((c) => head.append(el("th", { textContent: c })));
+      const copyHead = el("th");
+      copyHead.setAttribute("aria-label", "คัดลอกทั้งแถว");
+      head.append(copyHead);
       thead.replaceChildren(head);
       if (scroller.firstChild !== table) scroller.replaceChildren(table);
       applyColumnWidths();
@@ -137,7 +144,7 @@ export function createResults({ fileName }) {
     const parts = [isFiltered() ? `ตรงตัวกรอง ${fmt(n)} จาก ${fmt(rows.length)} แถว` : `${fmt(rows.length)} แถว`];
     if (shown && shown < n) parts.push(`แสดงแถว ${fmt(from + 1)}–${fmt(from + shown)}`);
     if (isFiltered()) parts.push("คัดลอกทั้งหมด, JSON และ CSV จะได้เฉพาะแถวที่ตรงตัวกรอง");
-    else parts.push(isTable(rows) ? "คลิกช่องเพื่อคัดลอก · ใช้ปุ่ม JSON หรือ CSV เพื่อส่งออกทั้งชุด" : "คลิกแถวเพื่อคัดลอก");
+    else parts.push(isTable(rows) ? "คลิกช่องเพื่อคัดลอกค่าเดียว หรือกดปุ่มคัดลอกท้ายแถวเพื่อคัดลอกทั้งแถว" : "คลิกแถวเพื่อคัดลอก");
     $("sheetFoot").textContent = parts.join(" · ");
   }
 
@@ -148,7 +155,7 @@ export function createResults({ fileName }) {
     if (!isTable(rows)) return "list";
     const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
     const numW = Math.max(NUM_MIN_PX, fmt(rows.length).length * NUM_DIGIT_REM * rem + NUM_PADDING_PX);
-    const tableW = numW + widthsFor().reduce((a, b) => a + b, 0);
+    const tableW = numW + widthsFor().reduce((a, b) => a + b, 0) + COPY_COL_PX;
     return tableW <= scroller.clientWidth ? "table" : "cards";
   }
 
@@ -180,10 +187,11 @@ export function createResults({ fileName }) {
   }
 
   function applyColumnWidths() {
-    const colgroup = el("colgroup", {}, el("col", { style: "width: var(--num-w)" }), ...widths.map((w) => el("col", { style: `width: ${w}px` })));
+    const colgroup = el("colgroup", {}, el("col", { style: "width: var(--num-w)" }), ...widths.map((w) => el("col", { style: `width: ${w}px` })),
+      el("col", { style: `width: ${COPY_COL_PX}px` }));
     table.querySelector("colgroup")?.remove();
     table.prepend(colgroup);
-    table.style.width = `calc(var(--num-w) + ${widths.reduce((a, b) => a + b, 0)}px)`;
+    table.style.width = `calc(var(--num-w) + ${widths.reduce((a, b) => a + b, 0) + COPY_COL_PX}px)`;
   }
 
   // Widths measured before the web fonts arrive would be for the fallback font; measure again once they load.
@@ -218,6 +226,7 @@ export function createResults({ fileName }) {
       tr.append(td);
     });
     if (hasCase(rows)) tr.append(el("td", {}, el("span", { className: "st " + (r.ok ? "ok" : "bad"), textContent: statusText(r) })));
+    tr.append(el("td", { className: "copy-cell" }, copyRowButton()));
     return tr;
   }
 
@@ -241,8 +250,22 @@ export function createResults({ fileName }) {
         el("span", { className: "rec-k", textContent: headers.at(-1) }),
         el("span", { className: "st " + (r.ok ? "ok" : "bad"), textContent: statusText(r) })));
     }
-    li.append(el("span", { className: "num", textContent: fmt(i + 1) }), fields);
+    li.append(el("span", { className: "num", textContent: fmt(i + 1) }), fields, copyRowButton());
     return li;
+  }
+
+  function copyRowButton() {
+    const b = el("button", { type: "button", className: "copy-row", title: "คัดลอกทั้งแถวเป็น JSON", innerHTML: COPY_ICON });
+    b.setAttribute("aria-label", "คัดลอกทั้งแถว");
+    return b;
+  }
+
+  // The copy-row button copies every field of its row as one JSON object.
+  async function copyWholeRow(button) {
+    const r = rows[Number(button.closest("[data-i]")?.dataset.i)];
+    if (!r || !(await copy(rowToJson(r), "คัดลอกทั้งแถวแล้ว (JSON)"))) return;
+    button.classList.add("copied");
+    setTimeout(() => button.classList.remove("copied"), COPIED_MS);
   }
 
   // Click a table cell or card field to copy that one value.
@@ -261,12 +284,17 @@ export function createResults({ fileName }) {
     hint.textContent = "✓";
     setTimeout(() => { li.classList.remove("copied"); hint.textContent = "คัดลอก"; }, COPIED_MS);
   }
-  const target = (e) => e.target.closest(".rec-field[data-c], td[data-c], .row");
-  const activate = (node) => (node.classList.contains("row") ? copyRow(node) : copyField(node));
+  const target = (e) => e.target.closest(".copy-row, .rec-field[data-c], td[data-c], .row");
+  const activate = (node) => {
+    if (node.classList.contains("copy-row")) copyWholeRow(node);
+    else if (node.classList.contains("row")) copyRow(node);
+    else copyField(node);
+  };
   scroller.addEventListener("click", (e) => { const node = target(e); if (node) activate(node); });
   scroller.addEventListener("keydown", (e) => {
     const node = target(e);
-    if (node && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); activate(node); }
+    // A button already fires click on Enter and Space.
+    if (node && !node.classList.contains("copy-row") && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); activate(node); }
   });
 
   // Filter controls.
