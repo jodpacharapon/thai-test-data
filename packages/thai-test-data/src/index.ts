@@ -69,6 +69,26 @@ export function createThaiData(options: ThaiDataOptions = {}) {
     },
     /** Build `count` items with any generator, e.g. `many(10, td.person)`. */
     many: <T>(count: number, factory: () => T): T[] => Array.from({ length: count }, () => factory()),
+    /**
+     * Like many(), but with no duplicates (values are compared as JSON), e.g. `unique(30000, td.phone)`.
+     * Throws when `maxAttempts` calls cannot produce `count` distinct values.
+     */
+    unique: <T>(count: number, factory: () => T, maxAttempts = count * 50 + 100): T[] => {
+      const seen = new Set<string>();
+      const out: T[] = [];
+      for (let i = 0; i < maxAttempts && out.length < count; i++) {
+        const value = factory();
+        const key = JSON.stringify(value);
+        if (!seen.has(key)) {
+          seen.add(key);
+          out.push(value);
+        }
+      }
+      if (out.length < count) {
+        throw new Error(`Only found ${out.length} unique values out of ${count} requested`);
+      }
+      return out;
+    },
   };
   return gen;
 }

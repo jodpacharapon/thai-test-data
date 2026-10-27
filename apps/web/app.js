@@ -63,6 +63,16 @@ const FIRST_DIGIT = [
 ];
 
 const pickOne = (rng, arr) => arr[Math.floor(rng() * arr.length)];
+// Tooltip text for settings, by control id (a control's own `help` wins).
+const HELP = {
+  case: "Valid = ผ่าน validation ทั้งหมด · Invalid = ผิดทั้งหมด ใช้ทำ negative test · Mixed = ปนกันประมาณครึ่งต่อครึ่ง ทุกแถวมี expected result บอกไว้",
+  bad: "เลือกว่าจะให้ผิดแบบไหน เลือกหลายแบบได้ ระบบจะสุ่มสลับกัน",
+  format: "รูปแบบการแสดงผลเท่านั้น ไม่มีผลกับว่าค่าถูกหรือผิด",
+  first: "หลักแรกของเลขบัตรบอกประเภทบุคคล เช่น 1 = คนไทยแจ้งเกิดตามกำหนด, 3 = มีชื่อในทะเบียนบ้านก่อนปี 2527, 8 = ต่างด้าวได้สัญชาติไทย",
+  province: "จำกัดให้สุ่มเฉพาะจังหวัดที่เลือก",
+  prefixes: "เลขสองหลักแรกของเบอร์มือถือที่อนุญาตให้สุ่ม",
+  fields: "เลือก column ที่ต้องการในตาราง",
+};
 const ROAD_EN = { "ถนนสุขุมวิท": "Sukhumvit Rd.", "ถนนพหลโยธิน": "Phahonyothin Rd.", "ถนนเพชรบุรี": "Phetchaburi Rd.", "ถนนรามคำแหง": "Ramkhamhaeng Rd.",
   "ถนนเจริญกรุง": "Charoen Krung Rd.", "ถนนมิตรภาพ": "Mittraphap Rd.", "ถนนเพชรเกษม": "Phetkasem Rd.", "ถนนสุดบรรทัด": "Sut Banthat Rd." };
 // Decide whether this row is a negative case, and which kind.
@@ -312,6 +322,16 @@ function renderConfig() {
     group.className = "cfg cfg-" + c.kind;
     const legend = document.createElement("legend");
     legend.textContent = c.label;
+    const help = c.help ?? HELP[c.id];
+    if (help) {
+      const info = document.createElement("button");
+      info.type = "button";
+      info.className = "info";
+      info.textContent = "i";
+      info.setAttribute("aria-label", `${c.label} คืออะไร`);
+      info.dataset.tip = help;
+      legend.append(info);
+    }
     group.appendChild(legend);
     const name = `${current.key}-${c.id}`;
 
@@ -385,17 +405,36 @@ const hasCase = () => values.length > 0 && values[0].ok !== undefined;
 const isTable = () => values.length > 0 && typeof values[0].value === "object";
 const statusText = (r) => (r.ok ? (r.okNote ? "Valid · " + r.okNote : "Valid") : "Invalid · " + r.note);
 
+const MAX_COUNT = 100000;
+const DISPLAY_LIMIT = 200;
+const fmt = (n) => n.toLocaleString("en-US");
+
 function generate() {
-  const count = Math.min(500, Math.max(1, Number($("count").value) || 1));
+  const count = Math.min(MAX_COUNT, Math.max(1, Number($("count").value) || 1));
   const seedVal = $("seed").value;
   const td = createThaiData(seedVal === "" ? {} : { seed: Number(seedVal) });
   const rng = seedVal === "" ? Math.random : seededRng(Number(seedVal) + 7919);
   const o = settings[current.key];
-  values = Array.from({ length: count }, () => norm(current.gen(td, o, rng)));
+  if ($("unique").checked) {
+    // Retry until there are enough distinct values; types with few possible values stop early.
+    const seen = new Set();
+    values = [];
+    for (let i = 0; i < count * 50 + 100 && values.length < count; i++) {
+      const r = norm(current.gen(td, o, rng));
+      const key = JSON.stringify(r.value);
+      if (!seen.has(key)) { seen.add(key); values.push(r); }
+    }
+  } else {
+    values = Array.from({ length: count }, () => norm(current.gen(td, o, rng)));
+  }
   const result = $("result");
   result.replaceChildren();
+  const n = values.length;
   const bad = values.filter((r) => r.ok === false).length;
-  const tally = hasCase() ? ` · valid ${count - bad} · invalid ${bad}` : "";
+  const tally = hasCase() ? ` · valid ${fmt(n - bad)} · invalid ${fmt(bad)}` : "";
+  const shortfall = n < count ? ` · unique ได้แค่ ${fmt(n)} จาก ${fmt(count)}` : "";
+  const truncated = n > DISPLAY_LIMIT ? ` · แสดง ${DISPLAY_LIMIT} แถวแรก ใช้ Copy all, JSON หรือ CSV เพื่อเอาครบทุกแถว` : "";
+  const summary = `${fmt(n)} rows${tally}${shortfall}`;
 
   if (isTable()) {
     const cols = Object.keys(values[0].value);
@@ -405,7 +444,7 @@ function generate() {
     const head = table.createTHead().insertRow();
     ["#", ...cols, ...(hasCase() ? ["Expected"] : [])].forEach((c) => { const th = document.createElement("th"); th.textContent = c; head.appendChild(th); });
     const body = table.createTBody();
-    values.forEach((r, i) => {
+    values.slice(0, DISPLAY_LIMIT).forEach((r, i) => {
       const tr = body.insertRow();
       tr.insertCell().textContent = i + 1;
       cols.forEach((c) => {
@@ -422,13 +461,13 @@ function generate() {
     });
     wrap.appendChild(table);
     result.appendChild(wrap);
-    $("sheetFoot").textContent = `${count} rows${tally} · ใช้ปุ่ม JSON หรือ CSV เพื่อ export ทั้งตาราง`;
+    $("sheetFoot").textContent = `${summary}${truncated || " · ใช้ปุ่ม JSON หรือ CSV เพื่อ export ทั้งตาราง"}`;
     return;
   }
 
   const list = document.createElement("ol");
   list.className = "rows";
-  values.forEach((r) => {
+  values.slice(0, DISPLAY_LIMIT).forEach((r) => {
     const v = r.value;
     const li = document.createElement("li");
     li.className = "row";
@@ -454,7 +493,7 @@ function generate() {
     list.appendChild(li);
   });
   result.appendChild(list);
-  $("sheetFoot").textContent = `${count} rows${tally} · คลิกแถวเพื่อ copy`;
+  $("sheetFoot").textContent = `${summary} · คลิกแถวเพื่อ copy${truncated}`;
 }
 
 const toCsv = () => {
@@ -472,7 +511,8 @@ const toJson = () => JSON.stringify(values.map((r) => (r.ok === undefined ? r.va
 $("regen").addEventListener("click", generate);
 $("count").addEventListener("change", generate);
 $("seed").addEventListener("change", generate);
-$("copyAll").addEventListener("click", () => copy(isTable() ? toCsv() : values.map((r) => r.value).join("\n"), `Copied ${values.length} rows`));
+$("unique").addEventListener("change", generate);
+$("copyAll").addEventListener("click", () => copy(isTable() ? toCsv() : values.map((r) => r.value).join("\n"), `Copied ${fmt(values.length)} rows`));
 $("copyJson").addEventListener("click", () => copy(toJson(), "Copied JSON"));
 $("dlCsv").addEventListener("click", () => {
   const a = document.createElement("a");
@@ -628,3 +668,21 @@ $("bugContext").addEventListener("change", (e) => setContext(e.target.checked));
 $("reportForm").addEventListener("input", updateIssueLink);
 $("reportForm").addEventListener("submit", (e) => e.preventDefault());
 fillReportContext();
+
+// Info tooltips: hover/focus shows them; a tap toggles them on touch screens.
+// Shift the tooltip left when it would run past the right edge of the screen.
+const placeTip = (e) => {
+  const btn = e.target.closest?.(".info");
+  if (!btn) return;
+  const width = Math.min(280, innerWidth - 32);
+  const left = btn.getBoundingClientRect().left - 8;
+  const overflow = left + width - (document.documentElement.clientWidth - 12);
+  btn.style.setProperty("--tip-x", `${-8 - Math.max(0, overflow)}px`);
+};
+document.addEventListener("pointerover", placeTip);
+document.addEventListener("focusin", placeTip);
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest(".info");
+  document.querySelectorAll(".info.open").forEach((b) => { if (b !== btn) b.classList.remove("open"); });
+  if (btn) btn.classList.toggle("open");
+});

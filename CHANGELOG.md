@@ -8,6 +8,9 @@ Format อ้างอิง [Keep a Changelog](https://keepachangelog.com/en/1.
 ### Added
 
 - Release workflow: push version ใหม่เข้า `main` แล้วสร้าง tag, GitHub Release และ publish ขึ้น npm ให้อัตโนมัติ
+- Library: `td.unique(count, factory)` generate แบบไม่มีค่าซ้ำ
+- Web app: generate ได้สูงสุด 100,000 รายการ (ตารางแสดง 200 แถวแรก ส่วน copy และ export ได้ครบ)
+- Web app: ตัวเลือก Unique และไอคอน ⓘ อธิบาย Count, Seed, Unique และ settings ต่างๆ
 
 ## [0.2.0] - 2026-10-27
 

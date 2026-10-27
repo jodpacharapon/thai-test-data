@@ -198,3 +198,20 @@ describe("postal codes", () => {
     }
   });
 });
+
+describe("unique", () => {
+  it("returns distinct values", () => {
+    const phones = td.unique(30000, td.phone);
+    expect(phones).toHaveLength(30000);
+    expect(new Set(phones).size).toBe(30000);
+  });
+
+  it("is reproducible with a seed", () => {
+    const a = createThaiData({ seed: 5 }), b = createThaiData({ seed: 5 });
+    expect(a.unique(100, a.citizenId)).toEqual(b.unique(100, b.citizenId));
+  });
+
+  it("throws when there are not enough distinct values", () => {
+    expect(() => td.unique(100, () => td.postalCode({ province: "สมุทรสงคราม" }))).toThrow(/Only found 3 unique/);
+  });
+});

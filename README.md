@@ -112,6 +112,7 @@ for (const kind of ["checksum", "short", "long", "letters"] as const) {
 
 ```ts
 const users = td.many(100, () => td.person("female"));
+const phones = td.unique(30000, td.phone); // 30,000 เบอร์ ไม่ซ้ำกัน
 const chiangMaiZips = td.many(20, () => td.postalCode({ province: "เชียงใหม่" }));
 ```
 
@@ -141,6 +142,7 @@ expect(lookupPostalCode(response.zip).map((l) => l.province)).toContain(response
 | `td.birthDate(minAge?, maxAge?)` | `Date` ของวันเกิดตามช่วงอายุ (default 18–65) |
 | `td.person(gender?)` | ข้อมูลบุคคลครบชุด |
 | `td.many(count, factory)` | เรียก `factory` ซ้ำ `count` ครั้ง แล้วคืนเป็น array |
+| `td.unique(count, factory)` | เหมือน `many` แต่ไม่มีค่าซ้ำ เช่น `td.unique(30000, td.phone)` (throw ถ้าค่าที่เป็นไปได้ไม่พอ) |
 | `td.random` | random function ที่ใช้ seed เดียวกัน สำหรับ generate ข้อมูลแบบของตัวเอง |
 
 ### Invalid data (negative cases)

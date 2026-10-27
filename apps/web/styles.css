@@ -139,6 +139,19 @@ tbody tr:last-child td { border-bottom: 0; }
 .cfg select, .cfg-number input { height: 34px; padding: 0 8px; border: 1px solid var(--rule-strong); border-radius: 6px; background: var(--panel); font-size: 0.9rem; }
 .cfg-number input { width: 84px; font-family: var(--font-mono); }
 
+/* Info tooltips: hover or focus on desktop, tap on touch screens (toggles .open). */
+.info { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 17px; height: 17px; margin-left: 4px; padding: 0;
+  border: 1px solid var(--rule-strong); border-radius: 50%; background: var(--panel); color: var(--sub);
+  font: italic 600 0.68rem/1 Georgia, "Times New Roman", serif; cursor: help; vertical-align: middle; flex: none; }
+.info:hover, .info.open { color: var(--navy); border-color: var(--navy); }
+.info::after { content: attr(data-tip); position: absolute; z-index: 25; box-sizing: border-box; top: calc(100% + 8px); left: var(--tip-x, -8px); width: max-content; max-width: min(280px, calc(100vw - 32px));
+  padding: 8px 10px; border-radius: 6px; background: var(--ink); color: var(--paper);
+  font: normal 400 0.82rem/1.5 var(--font-body); letter-spacing: 0; text-transform: none; white-space: normal; text-align: left;
+  display: none; pointer-events: none; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18); }
+.info:hover::after, .info:focus-visible::after, .info.open::after { display: block; }
+.cfg legend .info { margin-left: 6px; }
+.opt .check { color: var(--ink); font-size: 0.9rem; }
+
 /* Result status */
 .row { grid-template-columns: 44px minmax(0, 1fr) auto auto; }
 .st { font-size: 0.8rem; font-weight: 600; padding: 2px 8px; border-radius: 4px; margin-right: 10px; white-space: nowrap; }

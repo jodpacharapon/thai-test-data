@@ -62,8 +62,9 @@
         </div>
         <div class="config" id="config"></div>
         <div class="options">
-          <label class="opt">Count <input id="count" type="number" min="1" max="500" value="10"></label>
-          <label class="opt">Seed <input id="seed" type="number" placeholder="สุ่ม"></label>
+          <span class="opt"><label for="count">Count</label> <input id="count" type="number" min="1" max="100000" value="10"><button class="info" type="button" aria-label="Count คืออะไร" data-tip="จำนวนรายการที่จะ generate (สูงสุด 100,000) ตารางแสดงแค่ 200 แถวแรก แต่ Copy all, JSON และ CSV ได้ครบทุกแถว">i</button></span>
+          <span class="opt"><label for="seed">Seed</label> <input id="seed" type="number" placeholder="สุ่ม"><button class="info" type="button" aria-label="Seed คืออะไร" data-tip="ตัวเลขตั้งต้นของการสุ่ม ใส่ seed เดิม (เช่น 42) จะได้ data ชุดเดิมทุกครั้ง ใช้ reproduce test ที่ fail หรือให้ทั้งทีมใช้ data ชุดเดียวกัน ปล่อยว่าง = สุ่มใหม่ทุกครั้ง">i</button></span>
+          <span class="opt"><label class="check" for="unique"><input type="checkbox" id="unique">Unique</label><button class="info" type="button" aria-label="Unique คืออะไร" data-tip="ไม่ให้มีค่าซ้ำในชุดเดียวกัน เหมาะกับ field ที่ database ตั้ง unique constraint ถ้าค่าที่เป็นไปได้มีน้อยกว่าที่ขอ จะได้เท่าที่มี">i</button></span>
           <button class="btn main" id="regen" type="button">Generate</button>
           <span class="spacer"></span>
           <button class="btn" id="copyAll" type="button">Copy all</button>
@@ -151,6 +152,7 @@ test("ปฏิเสธเลขบัตรที่ผิด", async ({ page 
             <tr><td>td.birthDate(min, max)</td><td>วันเกิดตามช่วงอายุ</td></tr>
             <tr><td>td.person()</td><td>ข้อมูลบุคคลครบชุด</td></tr>
             <tr><td>td.many(n, fn)</td><td>generate หลายรายการ คืนเป็น array</td></tr>
+            <tr><td>td.unique(n, fn)</td><td>เหมือน many แต่ไม่มีค่าซ้ำ เช่น td.unique(30000, td.phone)</td></tr>
             <tr><td>isValidThaiId(value)</td><td>validate เลข 13 หลัก</td></tr>
             <tr><td>isValidPostalCode(code)</td><td>เช็กว่ารหัสไปรษณีย์มีใช้จริง</td></tr>
           </tbody>
