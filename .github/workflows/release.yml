@@ -2,7 +2,8 @@ name: Release
 
 # Bump packages/thai-test-data/package.json and add a CHANGELOG section, then push to main.
 # This creates the vX.Y.Z tag and GitHub release, and publishes to npm when NPM_TOKEN is set.
-# Already-released versions are skipped, so every push to main is safe.
+# Already-released versions are skipped, so every push to main is safe. Release notes of past
+# versions are kept in step with their CHANGELOG sections, so editing CHANGELOG.md updates them.
 
 on:
   push:
@@ -80,3 +81,17 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ env.NPM_TOKEN }}
         run: npm publish -w thai-test-data --provenance --access public
+
+      - name: Sync notes of past releases with CHANGELOG
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for version in $(grep -oP '^## \[\K[0-9]+\.[0-9]+\.[0-9]+(?=\])' CHANGELOG.md); do
+            gh release view "v$version" >/dev/null 2>&1 || continue
+            node .github/scripts/changelog-notes.mjs "$version" > notes.md
+            current=$(gh release view "v$version" --json body --jq .body)
+            if [ "$current" != "$(cat notes.md)" ]; then
+              gh release edit "v$version" --notes-file notes.md
+              echo "Updated notes of v$version"
+            fi
+          done

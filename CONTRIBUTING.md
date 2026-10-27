@@ -68,10 +68,11 @@ Release อัตโนมัติด้วย GitHub Actions ([`release.yml`](
 
 1. Bump version ใน `packages/thai-test-data/package.json` ตาม [Semantic Versioning](https://semver.org/)
    เช่น `npm version minor -w thai-test-data --no-git-tag-version`
-2. ใน `CHANGELOG.md` ย้ายรายการจาก `[Unreleased]` มาเป็น `## [X.Y.Z] - YYYY-MM-DD` และเพิ่ม compare link ท้ายไฟล์
+2. ใน `CHANGELOG.md` ย้ายรายการจาก `[Unreleased]` มาเป็น `## [X.Y.Z] - YYYY-MM-DD` เขียนทั้ง `### English` และ `### ภาษาไทย` และเพิ่ม compare link ท้ายไฟล์
 3. Commit แล้ว push เข้า `main`
 
 Workflow จะรัน test และ build แล้วสร้าง tag `vX.Y.Z` กับ GitHub Release โดยใช้ section นั้นใน CHANGELOG เป็น release notes
+ถ้าแก้ section ของ version ที่ release ไปแล้ว release notes บน GitHub จะอัปเดตตามให้เองตอน push เข้า `main`
 ถ้า repo มี secret `NPM_TOKEN` จะ publish ขึ้น npm (พร้อม provenance) ให้ด้วย version ที่ release ไปแล้วจะถูกข้าม
 
 ## License
