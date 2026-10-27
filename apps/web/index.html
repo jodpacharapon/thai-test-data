@@ -234,7 +234,7 @@ test("ปฏิเสธเลขบัตรที่ผิด", async ({ page 
             <tr><td>td.invalidJuristicId(kind?)</td><td>เลขนิติบุคคลที่ผิด ใช้ kind แบบเดียวกัน</td></tr>
             <tr><td>td.phone(prefixes?)</td><td>เบอร์มือถือ 10 หลัก จำกัดเลขขึ้นต้นได้ เช่น ["08"]</td></tr>
             <tr><td>td.invalidPhone(kind?)</td><td>เบอร์ที่ผิด: "prefix" | "short" | "long" | "letters"</td></tr>
-            <tr><td>td.name("male" | "female")</td><td>ชื่อ-นามสกุลไทยและอังกฤษ</td></tr>
+            <tr><td>td.name("male" | "female")</td><td>ชื่อ-นามสกุลไทยและอังกฤษ ใส่ { titles: "child" } ได้คำนำหน้าเด็ก (เด็กชาย / เด็กหญิง)</td></tr>
             <tr><td>td.address(options?)</td><td>ที่อยู่ครบ 77 จังหวัด 7,436 ตำบล รหัสไปรษณีย์ตรงกัน กรองได้ เช่น { province: "เชียงใหม่" } หรือ { bangkok: false }</td></tr>
             <tr><td>td.postalCode(options?)</td><td>รหัสไปรษณีย์ที่มีใช้จริง filter จังหวัดได้เหมือน address()</td></tr>
             <tr><td>td.invalidPostalCode(kind?)</td><td>รหัสไปรษณีย์ที่ผิด: "unknown" | "short" | "long" | "letters"</td></tr>
@@ -242,7 +242,7 @@ test("ปฏิเสธเลขบัตรที่ผิด", async ({ page 
             <tr><td>td.birthDate(min, max)</td><td>วันเกิดตามช่วงอายุ</td></tr>
             <tr><td>td.person()</td><td>ข้อมูลบุคคลครบชุด</td></tr>
             <tr><td>td.many(n, fn)</td><td>generate หลายรายการ คืนเป็น array</td></tr>
-            <tr><td>td.unique(n, fn)</td><td>เหมือน many แต่ไม่มีค่าซ้ำ เช่น td.unique(30000, td.phone)</td></tr>
+            <tr><td>td.unique(n, fn)</td><td>เหมือน many แต่ไม่มีค่าซ้ำ เช่น td.unique(30000, td.phone) ใส่ { partial: true } เพื่อคืนเท่าที่หาได้แทนการ throw</td></tr>
             <tr><td>isValidThaiId(value)</td><td>validate เลข 13 หลัก</td></tr>
             <tr><td>isValidPostalCode(code)</td><td>เช็กว่ารหัสไปรษณีย์มีใช้จริง</td></tr>
           </tbody>

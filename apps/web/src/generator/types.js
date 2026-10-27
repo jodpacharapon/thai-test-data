@@ -32,6 +32,7 @@ export const HELP = {
   province: "จำกัดให้สุ่มเฉพาะจังหวัดที่เลือก",
   prefixes: "เลขสองหลักแรกของเบอร์มือถือที่อนุญาตให้สุ่ม",
   fields: "เลือก column ที่ต้องการในตาราง",
+  titles: "ผู้ใหญ่ = นาย / นางสาว / นาง · เด็ก = เด็กชาย / เด็กหญิง (อายุไม่ถึง 15 ปี)",
 };
 const ROAD_EN = { "ถนนสุขุมวิท": "Sukhumvit Rd.", "ถนนพหลโยธิน": "Phahonyothin Rd.", "ถนนเพชรบุรี": "Phetchaburi Rd.", "ถนนรามคำแหง": "Ramkhamhaeng Rd.",
   "ถนนเจริญกรุง": "Charoen Krung Rd.", "ถนนมิตรภาพ": "Mittraphap Rd.", "ถนนเพชรเกษม": "Phetkasem Rd.", "ถนนสุดบรรทัด": "Sut Banthat Rd." };
@@ -84,9 +85,11 @@ export const TYPES = [
         choices: [["digits", "Contains digits"], ["symbols", "Special characters"], ["long", "Over 100 chars"], ["blank", "Whitespace only"]], def: ["digits", "symbols"] },
       { id: "lang", label: "Language", kind: "seg", choices: [["th", "TH"], ["en", "EN"], ["both", "TH + EN"]], def: "th" },
       { id: "gender", label: "Gender", kind: "seg", choices: [["any", "Random"], ["male", "Male"], ["female", "Female"]], def: "any" },
-      { id: "extra", label: "Include", kind: "checks", choices: [["title", "คำนำหน้า"]], def: ["title"] }],
+      { id: "extra", label: "Include", kind: "checks", choices: [["title", "คำนำหน้า"]], def: ["title"] },
+      { id: "titles", label: "คำนำหน้าแบบ", kind: "seg", when: (o) => o.extra.includes("title"),
+        choices: [["adult", "ผู้ใหญ่"], ["child", "เด็ก"]], def: "adult" }],
     gen: (td, o, rng) => {
-      const n = td.name(o.gender === "any" ? undefined : o.gender);
+      const n = td.name({ gender: o.gender === "any" ? undefined : o.gender, titles: o.titles });
       const title = o.extra.includes("title");
       const th = (title ? n.titleTh : "") + n.firstNameTh + " " + n.lastNameTh;
       const en = (title ? n.titleEn + " " : "") + n.firstNameEn + " " + n.lastNameEn;

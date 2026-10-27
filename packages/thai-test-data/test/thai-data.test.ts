@@ -215,3 +215,57 @@ describe("unique", () => {
     expect(() => td.unique(100, () => td.postalCode({ province: "สมุทรสงคราม" }))).toThrow(/Only found 3 unique/);
   });
 });
+
+describe("names", () => {
+  const big = createThaiData({ seed: 11 });
+
+  it("has enough distinct full names for 100,000 rows", () => {
+    expect(() => big.unique(100_000, () => big.name().fullNameTh)).not.toThrow();
+  });
+
+  it("mixes English spellings of the same Thai name", () => {
+    const spellings = new Map<string, Set<string>>();
+    for (const n of big.many(5000, () => big.name("male"))) {
+      spellings.set(n.firstNameTh, (spellings.get(n.firstNameTh) ?? new Set()).add(n.firstNameEn));
+    }
+    expect([...spellings.values()].some((s) => s.size > 1)).toBe(true);
+  });
+
+  it("spells English names with Latin letters only", () => {
+    for (const n of big.many(2000, big.name)) {
+      expect(n.firstNameEn).toMatch(/^[A-Z][a-z-]+$/);
+      expect(n.lastNameEn).toMatch(/^[A-Z][a-z-]+$/);
+    }
+  });
+
+  it("uses adult titles by default, with matching Thai and English", () => {
+    const pairs = new Set(big.many(2000, big.name).map((n) => `${n.gender}:${n.titleTh}:${n.titleEn}`));
+    expect(pairs).toEqual(new Set(["male:นาย:Mr.", "female:นางสาว:Ms.", "female:นาง:Mrs."]));
+  });
+
+  it("uses child titles in child mode", () => {
+    const pairs = new Set(big.many(500, () => big.name({ titles: "child" })).map((n) => `${n.gender}:${n.titleTh}:${n.titleEn}`));
+    expect(pairs).toEqual(new Set(["male:เด็กชาย:Master", "female:เด็กหญิง:Miss"]));
+  });
+
+  it("accepts a gender as before or inside options", () => {
+    expect(big.name("female").gender).toBe("female");
+    expect(big.name({ gender: "male", titles: "child" }).titleTh).toBe("เด็กชาย");
+  });
+});
+
+describe("unique options", () => {
+  it("returns what it found instead of throwing with partial", () => {
+    const codes = td.unique(100, () => td.postalCode({ province: "สมุทรสงคราม" }), { partial: true });
+    expect(codes).toHaveLength(3);
+  });
+
+  it("compares by a custom key", () => {
+    const rows = td.unique(5, () => ({ value: td.random() < 0.5 ? "a" : "b", n: td.random() }), { partial: true, key: (r) => r.value });
+    expect(rows.map((r) => r.value).sort()).toEqual(["a", "b"]);
+  });
+
+  it("still accepts maxAttempts as a number", () => {
+    expect(() => td.unique(10, () => "same", 20)).toThrow(/Only found 1 unique/);
+  });
+});

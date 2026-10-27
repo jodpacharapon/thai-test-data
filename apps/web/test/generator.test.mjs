@@ -64,3 +64,15 @@ test("rowToJson copies one row as an object, with its expected result when the t
   assert.deepEqual(JSON.parse(rowToJson({ value: { ชื่อ: "ก", เลขบัตร: "1" } })), { ชื่อ: "ก", เลขบัตร: "1" });
   assert.deepEqual(JSON.parse(rowToJson({ value: "b", ok: false, note: "short" })), { value: "b", expected: "invalid", reason: "short" });
 });
+
+test("name type uses child titles when asked", () => {
+  const nameType = TYPES.find((t) => t.key === "name");
+  const rows = generateRows(nameType, { ...defaults(nameType), titles: "child" }, { count: 50, seed: 4 });
+  assert.ok(rows.every((r) => /^เด็ก(ชาย|หญิง)/.test(r.value)));
+});
+
+test("unique mode stops early, without throwing, when values run out", () => {
+  const postal = TYPES.find((t) => t.key === "postal");
+  const rows = generateRows(postal, { ...defaults(postal), province: "สมุทรสงคราม" }, { count: 100, seed: 1, unique: true });
+  assert.ok(rows.length > 0 && rows.length < 100);
+});

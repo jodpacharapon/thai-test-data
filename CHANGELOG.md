@@ -7,6 +7,20 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Added
+
+- `td.name({ titles: "child" })` ใช้คำนำหน้าเด็ก (เด็กชาย / Master, เด็กหญิง / Miss) ส่วน `td.name("male")` แบบเดิมยังใช้ได้
+- คำนำหน้า นาง / Mrs. ในแบบผู้ใหญ่ สุ่มปนกับ นางสาว / Ms.
+- `td.unique()` รับ options `{ maxAttempts, partial, key }` โดย `partial: true` คืนเท่าที่หาได้แทนการ throw (ส่ง `maxAttempts` เป็นตัวเลขแบบเดิมได้)
+- Web app: ตั้งค่า "คำนำหน้าแบบ" ผู้ใหญ่ / เด็ก ในชนิดข้อมูลชื่อ-นามสกุล
+
+### Changed
+
+- ชื่อเยอะขึ้นมาก: ชื่อชาย 198 ชื่อ ชื่อหญิง 159 ชื่อ และนามสกุลประกอบจากสองส่วน (เช่น ศรี + สุข) ได้ราว 1,900 นามสกุล จากเดิมที่มีชื่อเต็มไม่ซ้ำแค่ราว 288 ชื่อ
+- ชื่อภาษาอังกฤษสะกดหลายแบบปนกัน เช่น Kittipong / Kittiphong, Srisuk / Sisook
+- ข้อมูลที่สร้างด้วย seed เดิมจะได้ชื่อไม่เหมือนเวอร์ชันก่อน
+- Web app: โหมด Unique เรียกใช้ `td.unique()` ของ library แทนการเขียนซ้ำเอง
+
 ## [0.3.1] - 2026-10-27
 
 ### English

@@ -1,7 +1,7 @@
 import { seededRng, type Rng } from "./random.js";
 import { breakThaiId, citizenId, invalidCitizenId, juristicId, type InvalidIdKind } from "./id.js";
 import { invalidMobilePhone, mobilePhone, type InvalidPhoneKind, type MobilePrefix } from "./phone.js";
-import { personName, type Gender, type PersonName } from "./name.js";
+import { personName, type Gender, type NameOptions, type PersonName } from "./name.js";
 import { address, type Address, type AddressOptions } from "./address.js";
 import { invalidPostalCode, postalCode, type InvalidPostalKind } from "./postal.js";
 import { birthDate, formatIsoDate, formatThaiDate } from "./date.js";
@@ -11,7 +11,7 @@ export * from "./phone.js";
 export * from "./date.js";
 export { INVALID_POSTAL_KINDS, POSTAL_CODES, isValidPostalCode, lookupPostalCode, type InvalidPostalKind } from "./postal.js";
 export { LOCALITIES, PROVINCES, type Address, type AddressOptions, type Locality } from "./address.js";
-export type { Gender, PersonName } from "./name.js";
+export type { Gender, NameOptions, PersonName, TitleMode } from "./name.js";
 export { seededRng, type Rng } from "./random.js";
 
 export interface Person extends PersonName {
@@ -21,6 +21,15 @@ export interface Person extends PersonName {
   birthDate: string;
   birthDateBE: string;
   address: Address;
+}
+
+export interface UniqueOptions<T> {
+  /** Calls to make before giving up. Default count * 50 + 100. */
+  maxAttempts?: number;
+  /** Return the values found so far instead of throwing when there are not enough. */
+  partial?: boolean;
+  /** What makes two values the same. Default: the whole value as JSON. */
+  key?: (value: T) => string;
 }
 
 export interface ThaiDataOptions {
@@ -45,7 +54,8 @@ export function createThaiData(options: ThaiDataOptions = {}) {
     invalidPhone: (kind?: InvalidPhoneKind) => invalidMobilePhone(rng, kind),
     /** The underlying random source, for building your own variations with the same seed. */
     random: rng,
-    name: (gender?: Gender) => personName(rng, gender),
+    /** Name with title; pass a gender, or options such as { titles: "child" } for เด็กชาย / เด็กหญิง. */
+    name: (genderOrOptions?: Gender | NameOptions) => personName(rng, genderOrOptions),
     /** Address whose subdistrict, district, province and postal code belong together. */
     address: (options?: AddressOptions) => address(rng, options),
     /** Real postal code, optionally limited like address(), e.g. postalCode({ province: "ภูเก็ต" }). */
@@ -71,20 +81,23 @@ export function createThaiData(options: ThaiDataOptions = {}) {
     many: <T>(count: number, factory: () => T): T[] => Array.from({ length: count }, () => factory()),
     /**
      * Like many(), but with no duplicates (values are compared as JSON), e.g. `unique(30000, td.phone)`.
-     * Throws when `maxAttempts` calls cannot produce `count` distinct values.
+     * Throws when it cannot find `count` distinct values, unless `partial` is set.
+     * The third argument may also be just `maxAttempts`.
      */
-    unique: <T>(count: number, factory: () => T, maxAttempts = count * 50 + 100): T[] => {
+    unique: <T>(count: number, factory: () => T, options: number | UniqueOptions<T> = {}): T[] => {
+      const { maxAttempts = count * 50 + 100, partial = false, key = (v: T) => JSON.stringify(v) } =
+        typeof options === "number" ? { maxAttempts: options } : options;
       const seen = new Set<string>();
       const out: T[] = [];
       for (let i = 0; i < maxAttempts && out.length < count; i++) {
         const value = factory();
-        const key = JSON.stringify(value);
-        if (!seen.has(key)) {
-          seen.add(key);
+        const k = key(value);
+        if (!seen.has(k)) {
+          seen.add(k);
           out.push(value);
         }
       }
-      if (out.length < count) {
+      if (out.length < count && !partial) {
         throw new Error(`Only found ${out.length} unique values out of ${count} requested`);
       }
       return out;

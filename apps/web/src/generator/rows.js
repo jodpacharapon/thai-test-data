@@ -23,12 +23,5 @@ export function generateRows(type, o, { count, seed, unique = false }) {
   const rng = seed === undefined ? Math.random : seededRng(seed + 7919);
   const next = () => norm(type.gen(td, o, rng));
   if (!unique) return Array.from({ length: count }, next);
-  const seen = new Set();
-  const rows = [];
-  for (let i = 0; i < count * 50 + 100 && rows.length < count; i++) {
-    const r = next();
-    const key = JSON.stringify(r.value);
-    if (!seen.has(key)) { seen.add(key); rows.push(r); }
-  }
-  return rows;
+  return td.unique(count, next, { partial: true, key: (r) => JSON.stringify(r.value) });
 }
