@@ -11,6 +11,7 @@ Format อ้างอิง [Keep a Changelog](https://keepachangelog.com/en/1.
 
 ### Changed
 
+- จัด repo เป็น npm workspaces: library ย้ายไป `packages/thai-test-data/` web app ย้ายไป `apps/web/` และแยก HTML, CSS, JS ออกจากกัน
 - Docs และ web app ใช้ศัพท์เทคนิคเป็นภาษาอังกฤษ เช่น Valid/Invalid, Format, Generate และเหตุผลของ invalid case
 
 ## [0.1.0] - 2026-10-27

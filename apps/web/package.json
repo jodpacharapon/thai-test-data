@@ -1,0 +1,14 @@
+{
+  "name": "@thai-test-data/web",
+  "private": true,
+  "description": "Thai Test Data web app: https://thai-test-data.vercel.app",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "npm run build -w thai-test-data && node scripts/build.mjs",
+    "dev": "npm run build && node scripts/serve.mjs 8080"
+  },
+  "dependencies": {
+    "thai-test-data": "*"
+  }
+}

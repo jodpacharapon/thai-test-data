@@ -1,59 +1,21 @@
 {
-  "name": "thai-test-data",
-  "version": "0.1.0",
-  "description": "Realistic, valid Thai test data for QA and test automation: national ID, phone, names, addresses, postal codes and Buddhist-era dates, with negative cases.",
-  "keywords": [
-    "thai",
-    "thailand",
-    "test-data",
-    "faker",
-    "fixtures",
-    "test-automation",
-    "qa",
-    "playwright",
-    "citizen-id",
-    "postal-code",
-    "address",
-    "negative-testing"
-  ],
-  "homepage": "https://thai-test-data.vercel.app",
-  "bugs": {
-    "url": "https://github.com/jodpacharapon/thai-test-data/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jodpacharapon/thai-test-data.git"
-  },
+  "name": "thai-test-data-monorepo",
+  "private": true,
+  "description": "Thai Test Data: library (packages/thai-test-data) and web app (apps/web)",
   "license": "MIT",
-  "author": "jodpacharapon (https://github.com/jodpacharapon)",
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    }
-  },
-  "sideEffects": false,
-  "files": [
-    "dist",
-    "THIRD_PARTY_NOTICES.md"
+  "workspaces": [
+    "packages/*",
+    "apps/*"
   ],
   "engines": {
     "node": ">=20"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "build:data": "node scripts/build-localities.mjs",
-    "test": "vitest run",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "site": "npm run build && rm -rf site/lib && cp -r dist site/lib",
-    "dev": "npm run site && node scripts/serve.mjs 8080",
-    "prepublishOnly": "npm run typecheck && npm test && npm run build"
-  },
-  "devDependencies": {
-    "typescript": "5.9.3",
-    "vitest": "3.2.4"
+    "build": "npm run build -w thai-test-data",
+    "build:web": "npm run build -w @thai-test-data/web",
+    "build:data": "npm run build:data -w thai-test-data --",
+    "dev": "npm run dev -w @thai-test-data/web",
+    "test": "npm test -w thai-test-data",
+    "typecheck": "npm run typecheck -w thai-test-data"
   }
 }

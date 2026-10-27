@@ -1,3 +1,7 @@
 node_modules/
 dist/
-site/lib/
+
+# Copied from the repo root by prepack
+packages/thai-test-data/README.md
+packages/thai-test-data/LICENSE
+packages/thai-test-data/THIRD_PARTY_NOTICES.md

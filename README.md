@@ -12,7 +12,7 @@ Realistic, valid Thai test data for QA and test automation, with negative cases 
 
 [**Web app**](https://thai-test-data.vercel.app) · [**Docs**](https://thai-test-data.vercel.app/#docs) · [Report a bug](https://thai-test-data.vercel.app/#report) · [Request a data type](https://github.com/jodpacharapon/thai-test-data/issues/new?template=feature_request.yml)
 
-<img src="docs/screenshot.png" alt="Generator: เลขบัตรประชาชนแบบ mixed valid/invalid พร้อม expected result ทุกแถว" width="860">
+<img src="https://raw.githubusercontent.com/jodpacharapon/thai-test-data/main/docs/screenshot.png" alt="Generator: เลขบัตรประชาชนแบบ mixed valid/invalid พร้อม expected result ทุกแถว" width="860">
 
 </div>
 
@@ -178,22 +178,32 @@ expect(lookupPostalCode(response.zip).map((l) => l.province)).toContain(response
 
 ## Project structure
 
+Monorepo แบบ [npm workspaces](https://docs.npmjs.com/cli/using-npm/workspaces) มี 2 workspace:
+
 ```
 thai-test-data/
-├── src/                     # library source
-│   ├── index.ts             # createThaiData() และ export ทั้งหมด
-│   ├── id.ts                # เลขบัตรประชาชน เลขนิติบุคคล check digit
-│   ├── phone.ts             # เบอร์มือถือ
-│   ├── name.ts              # ชื่อ-นามสกุล
-│   ├── address.ts           # ที่อยู่
-│   ├── postal.ts            # รหัสไปรษณีย์
-│   ├── date.ts              # วันที่ พ.ศ.
-│   ├── random.ts            # seeded random
-│   └── data/localities.ts   # ข้อมูลตำบล (generated ห้ามแก้เอง)
-├── test/                    # unit tests (Vitest)
-├── site/index.html          # Web app (deploy บน Vercel)
-├── scripts/                 # build script และ dev server
-└── docs/                    # รูปใน README
+├── packages/
+│   └── thai-test-data/          # library (publish ขึ้น npm)
+│       ├── src/
+│       │   ├── index.ts         # createThaiData() และ export ทั้งหมด
+│       │   ├── id.ts            # เลขบัตรประชาชน เลขนิติบุคคล check digit
+│       │   ├── phone.ts         # เบอร์มือถือ
+│       │   ├── name.ts          # ชื่อ-นามสกุล
+│       │   ├── address.ts       # ที่อยู่
+│       │   ├── postal.ts        # รหัสไปรษณีย์
+│       │   ├── date.ts          # วันที่ พ.ศ.
+│       │   ├── random.ts        # seeded random
+│       │   └── data/localities.ts  # ข้อมูลตำบล (generated ห้ามแก้เอง)
+│       ├── test/                # unit tests (Vitest)
+│       └── scripts/             # build:data และ prepack
+├── apps/
+│   └── web/                     # web app (deploy บน Vercel)
+│       ├── index.html
+│       ├── styles.css
+│       ├── app.js
+│       └── scripts/             # build และ dev server
+├── docs/                        # รูปใน README
+└── vercel.json                  # build web app จาก root
 ```
 
 ## Development
@@ -204,12 +214,14 @@ cd thai-test-data
 npm install
 ```
 
+รันทุกคำสั่งจาก root ของ repo
+
 | Command | Description |
 |---|---|
-| `npm test` | run unit tests |
+| `npm test` | run unit tests ของ library |
 | `npm run typecheck` | type check |
-| `npm run build` | build library ไปที่ `dist/` |
-| `npm run site` | build library แล้ว copy ไปที่ `site/lib/` |
+| `npm run build` | build library ไปที่ `packages/thai-test-data/dist/` |
+| `npm run build:web` | build library แล้วรวมกับ web app ไปที่ `apps/web/dist/` |
 | `npm run dev` | build แล้ว serve web app ที่ http://localhost:8080 |
 
 ## Address data
@@ -227,7 +239,7 @@ git clone --depth 1 https://github.com/kongvut/thai-province-data /tmp/thai-prov
 npm run build:data -- /tmp/thai-province-data/api/latest/province_with_district_and_sub_district.json
 ```
 
-แล้วแก้ `SOURCE_COMMIT` ใน [`scripts/build-localities.mjs`](scripts/build-localities.mjs) ให้ตรงกับ commit ที่ใช้
+แล้วแก้ `SOURCE_COMMIT` ใน [`build-localities.mjs`](packages/thai-test-data/scripts/build-localities.mjs) ให้ตรงกับ commit ที่ใช้
 
 ## Contributing
 

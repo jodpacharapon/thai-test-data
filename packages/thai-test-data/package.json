@@ -1,0 +1,61 @@
+{
+  "name": "thai-test-data",
+  "version": "0.1.0",
+  "description": "Realistic, valid Thai test data for QA and test automation: national ID, phone, names, addresses, postal codes and Buddhist-era dates, with negative cases.",
+  "keywords": [
+    "thai",
+    "thailand",
+    "test-data",
+    "faker",
+    "fixtures",
+    "test-automation",
+    "qa",
+    "playwright",
+    "citizen-id",
+    "postal-code",
+    "address",
+    "negative-testing"
+  ],
+  "homepage": "https://thai-test-data.vercel.app",
+  "bugs": {
+    "url": "https://github.com/jodpacharapon/thai-test-data/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jodpacharapon/thai-test-data.git",
+    "directory": "packages/thai-test-data"
+  },
+  "license": "MIT",
+  "author": "jodpacharapon (https://github.com/jodpacharapon)",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "build:data": "node scripts/build-localities.mjs",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "prepack": "node scripts/copy-root-docs.mjs",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "vitest": "3.2.4"
+  }
+}
