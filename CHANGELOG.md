@@ -5,6 +5,14 @@ Format อ้างอิง [Keep a Changelog](https://keepachangelog.com/en/1.
 
 ## [Unreleased]
 
+### Added
+
+- Web app: หน้า Report เปิด GitHub issue (bug report / feature request) พร้อมแนบ data type, settings และ seed ให้อัตโนมัติ
+
+### Changed
+
+- Docs และ web app ใช้ศัพท์เทคนิคเป็นภาษาอังกฤษ เช่น Valid/Invalid, Format, Generate และเหตุผลของ invalid case
+
 ## [0.1.0] - 2026-10-27
 
 First release
@@ -25,7 +33,6 @@ First release
 - Generator พร้อม settings panel เลือก valid, invalid หรือ mixed และแสดง expected result ทุกแถว
 - Copy ทีละค่า, copy all หรือ export เป็น JSON และ CSV
 - Validator เลขบัตรพร้อมแสดงวิธีคำนวณ check digit และ validator รหัสไปรษณีย์
-- หน้า Report เปิด GitHub issue (bug report / feature request) พร้อมแนบ data type, settings และ seed ให้อัตโนมัติ
 - หน้า Docs, light/dark mode, responsive บนมือถือ
 
 [Unreleased]: https://github.com/jodpacharapon/thai-test-data/compare/v0.1.0...HEAD
