@@ -1,0 +1,82 @@
+name: Release
+
+# Bump packages/thai-test-data/package.json and add a CHANGELOG section, then push to main.
+# This creates the vX.Y.Z tag and GitHub release, and publishes to npm when NPM_TOKEN is set.
+# Already-released versions are skipped, so every push to main is safe.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - name: Check what needs releasing
+        id: plan
+        run: |
+          version=$(node -p "require('./packages/thai-test-data/package.json').version")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+          if git rev-parse -q --verify "refs/tags/v$version" >/dev/null; then
+            echo "github=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "github=true" >> "$GITHUB_OUTPUT"
+          fi
+
+          if [ -n "$NPM_TOKEN" ] && ! npm view "thai-test-data@$version" version >/dev/null 2>&1; then
+            echo "npm=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "npm=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Summary
+        run: |
+          echo "Version: ${{ steps.plan.outputs.version }}"
+          echo "Create GitHub release: ${{ steps.plan.outputs.github }}"
+          echo "Publish to npm: ${{ steps.plan.outputs.npm }} (needs the NPM_TOKEN secret)"
+
+      - name: Install, test and build
+        if: steps.plan.outputs.github == 'true' || steps.plan.outputs.npm == 'true'
+        run: |
+          npm ci
+          npm run typecheck
+          npm test
+          npm run build
+
+      - name: Create GitHub release
+        if: steps.plan.outputs.github == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.plan.outputs.version }}
+        run: |
+          node .github/scripts/changelog-notes.mjs "$VERSION" > release-notes.md
+          gh release create "v$VERSION" --target "$GITHUB_SHA" --title "v$VERSION" --notes-file release-notes.md
+
+      - name: Publish to npm
+        if: steps.plan.outputs.npm == 'true'
+        env:
+          NODE_AUTH_TOKEN: ${{ env.NPM_TOKEN }}
+        run: npm publish -w thai-test-data --provenance --access public

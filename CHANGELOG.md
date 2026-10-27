@@ -5,6 +5,10 @@ Format อ้างอิง [Keep a Changelog](https://keepachangelog.com/en/1.
 
 ## [Unreleased]
 
+### Added
+
+- Release workflow: push version ใหม่เข้า `main` แล้วสร้าง tag, GitHub Release และ publish ขึ้น npm ให้อัตโนมัติ
+
 ## [0.2.0] - 2026-10-27
 
 Library API เหมือน 0.1.0 ทุกอย่าง ใช้แทนกันได้ทันที ส่วนที่เปลี่ยนคือ web app และโครงสร้าง repo
