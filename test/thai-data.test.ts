@@ -109,3 +109,40 @@ describe("person", () => {
     expect(s1.person()).toEqual(s2.person());
   });
 });
+
+describe("invalid variants", () => {
+  it("breaks IDs in each requested way", () => {
+    for (let i = 0; i < 100; i++) {
+      expect(td.invalidCitizenId("short")).toMatch(/^\d{12}$/);
+      expect(td.invalidCitizenId("long")).toMatch(/^\d{14}$/);
+      expect(td.invalidCitizenId("letters")).toMatch(/^\d+[OISB]\d+$/);
+      for (const kind of ["checksum", "short", "long", "letters"] as const) {
+        expect(isValidThaiId(td.invalidCitizenId(kind))).toBe(false);
+        expect(isValidThaiId(td.invalidJuristicId(kind))).toBe(false);
+      }
+    }
+  });
+
+  it("fixes the first digit of a citizen ID", () => {
+    for (const id of td.many(50, () => td.citizenId(3))) {
+      expect(id[0]).toBe("3");
+      expect(isValidThaiId(id)).toBe(true);
+    }
+    expect(() => td.citizenId(0)).toThrow();
+  });
+
+  it("breaks phone numbers in each requested way", () => {
+    for (let i = 0; i < 100; i++) {
+      expect(td.invalidPhone("prefix")).toMatch(/^0[1-57]\d{8}$/);
+      expect(td.invalidPhone("short")).toMatch(/^\d{9}$/);
+      expect(td.invalidPhone("long")).toMatch(/^\d{11}$/);
+      for (const kind of ["prefix", "short", "long", "letters"] as const) {
+        expect(isValidMobilePhone(td.invalidPhone(kind))).toBe(false);
+      }
+    }
+  });
+
+  it("limits phone prefixes", () => {
+    for (const p of td.many(50, () => td.phone(["08"]))) expect(p.startsWith("08")).toBe(true);
+  });
+});

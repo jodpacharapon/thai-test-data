@@ -1,6 +1,6 @@
 import { seededRng, type Rng } from "./random.js";
-import { citizenId, invalidCitizenId, juristicId } from "./id.js";
-import { mobilePhone } from "./phone.js";
+import { breakThaiId, citizenId, invalidCitizenId, juristicId, type InvalidIdKind } from "./id.js";
+import { invalidMobilePhone, mobilePhone, type InvalidPhoneKind, type MobilePrefix } from "./phone.js";
 import { personName, type Gender, type PersonName } from "./name.js";
 import { address, type Address } from "./address.js";
 import { birthDate, formatIsoDate, formatThaiDate } from "./date.js";
@@ -30,10 +30,19 @@ export function createThaiData(options: ThaiDataOptions = {}) {
   const rng: Rng = options.seed === undefined ? Math.random : seededRng(options.seed);
 
   const gen = {
-    citizenId: () => citizenId(rng),
-    invalidCitizenId: () => invalidCitizenId(rng),
+    /** Valid citizen ID; optionally fix the first digit (person type 1-8). */
+    citizenId: (firstDigit?: number) => citizenId(rng, firstDigit),
+    /** Citizen ID that fails validation: "checksum" (default), "short", "long" or "letters". */
+    invalidCitizenId: (kind?: InvalidIdKind) => invalidCitizenId(rng, kind),
     juristicId: () => juristicId(rng),
-    phone: () => mobilePhone(rng),
+    /** Juristic tax ID that fails validation, same kinds as invalidCitizenId. */
+    invalidJuristicId: (kind?: InvalidIdKind) => breakThaiId(rng, juristicId(rng), kind),
+    /** Mobile number; optionally limit prefixes, e.g. phone(["08"]). */
+    phone: (prefixes?: readonly MobilePrefix[]) => mobilePhone(rng, prefixes),
+    /** Mobile number that fails validation: "prefix" (default), "short", "long" or "letters". */
+    invalidPhone: (kind?: InvalidPhoneKind) => invalidMobilePhone(rng, kind),
+    /** The underlying random source, for building your own variations with the same seed. */
+    random: rng,
     name: (gender?: Gender) => personName(rng, gender),
     address: () => address(rng),
     birthDate: (minAge?: number, maxAge?: number) => birthDate(rng, minAge, maxAge),

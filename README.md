@@ -25,9 +25,11 @@ check digits, mobile numbers, Thai/English names, consistent addresses, and Budd
 | ข้อมูล | ฟังก์ชัน |
 |---|---|
 | เลขบัตรประชาชน (valid) | `td.citizenId()` |
-| เลขบัตรประชาชน (invalid) | `td.invalidCitizenId()` |
-| เลขผู้เสียภาษีนิติบุคคล | `td.juristicId()` |
-| เบอร์มือถือ | `td.phone()` |
+| เลขบัตรประชาชน กำหนดหลักแรก (ประเภทบุคคล 1-8) | `td.citizenId(3)` |
+| เลขบัตรประชาชน (invalid) | `td.invalidCitizenId("checksum" \| "short" \| "long" \| "letters")` |
+| เลขผู้เสียภาษีนิติบุคคล | `td.juristicId()` / `td.invalidJuristicId(kind)` |
+| เบอร์มือถือ | `td.phone()` หรือจำกัดเลขขึ้นต้น `td.phone(["08"])` |
+| เบอร์มือถือ (invalid) | `td.invalidPhone("prefix" \| "short" \| "long" \| "letters")` |
 | ชื่อ-นามสกุล ไทย/อังกฤษ | `td.name("male" \| "female")` |
 | ที่อยู่ (จังหวัด/อำเภอ/ตำบล/รหัสไปรษณีย์ตรงกัน) | `td.address()` |
 | วันเกิดตามช่วงอายุ | `td.birthDate(18, 65)` |

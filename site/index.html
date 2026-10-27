@@ -123,6 +123,45 @@
     .spacer { flex-basis: 100%; height: 0; }
   }
 
+
+  /* Theme button: show the icon of the mode you would switch to. */
+  .i-sun { display: none; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .i-sun { display: block; } :root:not([data-theme="light"]) .i-moon { display: none; } }
+  :root[data-theme="dark"] .i-sun { display: block; }
+  :root[data-theme="dark"] .i-moon { display: none; }
+  @media (max-width: 900px) { .theme-label { display: none; } }
+
+  /* Settings panel */
+  .config { display: flex; flex-wrap: wrap; gap: 18px 28px; padding: 16px 20px 18px; border-bottom: 1px solid var(--rule); }
+  .cfg { border: 0; margin: 0; padding: 0; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+  .cfg legend { padding: 0; margin-bottom: 6px; font: 600 0.78rem var(--font-head); letter-spacing: 0.04em; color: var(--sub); }
+  .cfg-hint { color: var(--sub); font-size: 0.78rem; }
+  .seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--rule-strong); border-radius: 6px; overflow: hidden; }
+  .seg input { position: absolute; opacity: 0; pointer-events: none; }
+  .seg label { padding: 6px 12px; font-size: 0.9rem; cursor: pointer; border-right: 1px solid var(--rule); background: var(--panel); white-space: nowrap; }
+  .seg label:last-of-type { border-right: 0; }
+  .seg label:hover { background: var(--well); }
+  .seg input:checked + label { background: var(--navy); color: var(--navy-ink); font-weight: 600; }
+  .seg input:checked + label[data-case="invalid"] { background: var(--red); border-color: var(--red); color: var(--panel); }
+  .seg input:focus-visible + label { outline: 2px solid var(--navy); outline-offset: -2px; }
+  .checks { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+  .check { display: inline-flex; align-items: center; gap: 7px; font-size: 0.92rem; cursor: pointer; white-space: nowrap; }
+  .check input { width: 17px; height: 17px; margin: 0; accent-color: var(--navy); cursor: pointer; }
+  .cfg select, .cfg-number input { height: 34px; padding: 0 8px; border: 1px solid var(--rule-strong); border-radius: 6px; background: var(--panel); font-size: 0.9rem; }
+  .cfg-number input { width: 84px; font-family: var(--font-mono); }
+
+  /* Result status */
+  .row { grid-template-columns: 44px minmax(0, 1fr) auto auto; }
+  .st { font-size: 0.8rem; font-weight: 600; padding: 2px 8px; border-radius: 4px; margin-right: 10px; white-space: nowrap; }
+  .st:empty { display: none; }
+  .st.ok { color: var(--green); background: var(--green-tint); }
+  .st.bad { color: var(--red); background: var(--red-tint); }
+  @media (max-width: 520px) {
+    .row { grid-template-columns: 36px minmax(0, 1fr); }
+    .row .st { grid-column: 2; justify-self: start; margin: 0 0 8px 14px; }
+    .row .hint { display: none; }
+  }
+
   /* Validate view */
   .narrow { max-width: 760px; }
   .page-title { font: 600 1.6rem/1.3 var(--font-head); margin: 0 0 4px; }
@@ -185,7 +224,9 @@
     </nav>
     <div class="bar-actions">
       <button class="tool-btn" id="themeBtn" type="button" aria-label="สลับธีมสว่าง/มืด" title="สลับธีม">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <svg class="i-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <svg class="i-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <span class="theme-label"></span>
       </button>
       <a class="tool-btn" href="https://github.com/jodpacharapon/thai-test-data" target="_blank" rel="noopener">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.08-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.82 1.19 3.08 0 4.41-2.69 5.39-5.25 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg>
@@ -211,6 +252,7 @@
           <h1 id="typeTitle"></h1>
           <p id="typeDesc"></p>
         </div>
+        <div class="config" id="config"></div>
         <div class="options">
           <label class="opt">จำนวน <input id="count" type="number" min="1" max="500" value="10"></label>
           <label class="opt">Seed <input id="seed" type="number" placeholder="สุ่ม"></label>
@@ -305,7 +347,7 @@ test("ปฏิเสธเลขบัตรที่ผิด", async ({ page 
 <div class="toast" id="toast" role="status"></div>
 
 <script type="module">
-  import { createThaiData, isValidThaiId, thaiIdCheckDigit, formatThaiId, formatPhone, toE164, formatThaiDate, formatThaiDateLong, formatIsoDate } from "./lib/index.js";
+  import { createThaiData, seededRng, breakThaiId, isValidThaiId, thaiIdCheckDigit, formatThaiId, formatPhone, toE164 } from "./lib/index.js";
 
   const $ = (id) => document.getElementById(id);
 
@@ -324,11 +366,16 @@ test("ปฏิเสธเลขบัตรที่ผิด", async ({ page 
   // Theme
   const root = document.documentElement;
   try { const saved = localStorage.getItem("theme"); if (saved) root.dataset.theme = saved; } catch {}
+  const isDark = () => root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  // The button shows the mode you switch to.
+  const paintThemeBtn = () => { document.querySelector(".theme-label").textContent = isDark() ? "โหมดสว่าง" : "โหมดมืด"; };
   $("themeBtn").addEventListener("click", () => {
-    const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
-    root.dataset.theme = dark ? "light" : "dark";
+    root.dataset.theme = isDark() ? "light" : "dark";
     try { localStorage.setItem("theme", root.dataset.theme); } catch {}
+    paintThemeBtn();
   });
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", paintThemeBtn);
+  paintThemeBtn();
 
   // Views
   const VIEWS = ["generate", "validate", "code"];
@@ -342,55 +389,196 @@ test("ปฏิเสธเลขบัตรที่ผิด", async ({ page 
   addEventListener("hashchange", () => { showView(); scrollTo(0, 0); });
   showView();
 
-  // Data types. `text` marks values set in the body face instead of mono.
+  // ---- Data types and their settings -------------------------------------------------
+  // Each type declares its controls (like a password generator) and a gen(td, o, rng)
+  // that returns a value, or { value, ok, note } when it can produce negative cases.
   const GROUPS = { id: "บัตรและภาษี", phone: "เบอร์โทร", name: "ชื่อและอีเมล", address: "ที่อยู่", date: "วันที่", person: "ครบชุด" };
-  const TYPES = [
-    { key: "citizen", group: "id", title: "เลขบัตรประชาชน", desc: "13 หลัก check digit ถูกต้อง หลักแรก 1-8", keys: "citizen id national", gen: (td) => td.citizenId() },
-    { key: "citizen-dash", group: "id", title: "เลขบัตรประชาชน (มีขีด)", desc: "รูปแบบ X-XXXX-XXXXX-XX-X แบบที่พิมพ์บนบัตร", keys: "citizen id format dash ขีด", gen: (td) => formatThaiId(td.citizenId()) },
-    { key: "citizen-bad", group: "id", title: "เลขบัตรประชาชนที่ผิด", desc: "หน้าตาเหมือนเลขจริง แต่ check digit ผิด ใช้เทสว่าระบบปฏิเสธได้", keys: "citizen id invalid negative ผิด", gen: (td) => td.invalidCitizenId(), negative: true },
-    { key: "juristic", group: "id", title: "เลขผู้เสียภาษีนิติบุคคล", desc: "13 หลัก ขึ้นต้นด้วย 0 ใช้สูตร check digit เดียวกับบัตรประชาชน", keys: "นิติบุคคล บริษัท ภาษี tax juristic company", gen: (td) => td.juristicId() },
-    { key: "phone", group: "phone", title: "เบอร์มือถือ", desc: "10 หลัก ขึ้นต้นด้วย 06, 08 หรือ 09", keys: "โทรศัพท์ มือถือ phone mobile tel", gen: (td) => td.phone() },
-    { key: "phone-dash", group: "phone", title: "เบอร์มือถือ (มีขีด)", desc: "รูปแบบ 0XX-XXX-XXXX", keys: "phone mobile format dash ขีด", gen: (td) => formatPhone(td.phone()) },
-    { key: "phone-e164", group: "phone", title: "เบอร์มือถือ (+66)", desc: "รูปแบบสากล E.164 สำหรับ API ที่ต้องการรหัสประเทศ", keys: "phone e164 international", gen: (td) => toE164(td.phone()) },
-    { key: "name-th", group: "name", title: "ชื่อ-นามสกุล ภาษาไทย", desc: "มีคำนำหน้า นาย หรือ นางสาว", keys: "ชื่อ นามสกุล name thai", gen: (td) => td.name().fullNameTh, text: true },
-    { key: "name-en", group: "name", title: "ชื่อ-นามสกุล ภาษาอังกฤษ", desc: "ชื่อไทยที่เขียนเป็นภาษาอังกฤษ มีคำนำหน้า Mr. หรือ Ms.", keys: "ชื่อ นามสกุล name english", gen: (td) => td.name().fullNameEn, text: true },
-    { key: "email", group: "name", title: "อีเมล", desc: "ใช้โดเมน example.com ซึ่งส่งอีเมลจริงไม่ได้", keys: "email mail", gen: (td) => td.person().email },
-    { key: "address", group: "address", title: "ที่อยู่เต็ม", desc: "จังหวัด อำเภอ ตำบล และรหัสไปรษณีย์ตรงกันจริง", keys: "address บ้าน", gen: (td) => td.address().fullAddress, text: true },
-    { key: "address-parts", group: "address", title: "ที่อยู่ (แยกช่อง)", desc: "แยกเป็นช่อง สำหรับฟอร์มที่กรอกทีละช่อง", keys: "address province district zip postal จังหวัด อำเภอ ตำบล รหัสไปรษณีย์",
-      gen: (td) => { const a = td.address(); return { "บ้านเลขที่": a.houseNo, "หมู่": a.moo ?? "-", "ถนน": a.road, "ตำบล/แขวง": a.subdistrict, "อำเภอ/เขต": a.district, "จังหวัด": a.province, "รหัสไปรษณีย์": a.postalCode }; } },
-    { key: "birth-be", group: "date", title: "วันเกิด (พ.ศ.)", desc: "รูปแบบ วว/ดด/ปปปป อายุ 18-65 ปี", keys: "birth date buddhist พ.ศ.", gen: (td) => formatThaiDate(td.birthDate()) },
-    { key: "birth-long", group: "date", title: "วันเกิด (แบบเต็ม)", desc: "เช่น 5 มีนาคม 2535", keys: "birth date long thai เดือน", gen: (td) => formatThaiDateLong(td.birthDate()), text: true },
-    { key: "birth-iso", group: "date", title: "วันเกิด (ค.ศ. ISO)", desc: "รูปแบบ YYYY-MM-DD สำหรับ API", keys: "birth date iso ค.ศ.", gen: (td) => formatIsoDate(td.birthDate()) },
-    { key: "person", group: "person", title: "บุคคลครบชุด", desc: "ชื่อ เลขบัตร เบอร์ อีเมล วันเกิด และที่อยู่ ของคนเดียวกัน", keys: "person คน json ทั้งหมด",
-      gen: (td) => { const p = td.person(); return { "ชื่อ": p.fullNameTh, "เลขบัตร": p.citizenId, "เบอร์": p.phone, "อีเมล": p.email, "วันเกิด": p.birthDateBE, "ที่อยู่": p.address.fullAddress }; } },
+
+  const CASE = { id: "case", label: "กรณีทดสอบ", kind: "seg", choices: [["valid", "ถูกต้อง"], ["invalid", "ผิด"], ["mixed", "ผสม"]], def: "valid" };
+  const ID_BAD = { id: "bad", label: "ข้อมูลผิดแบบไหน", kind: "checks", when: (o) => o.case !== "valid",
+    choices: [["checksum", "check digit ผิด"], ["short", "12 หลัก"], ["long", "14 หลัก"], ["letters", "มีตัวอักษรปน"]], def: ["checksum"] };
+  const ID_NOTE = { checksum: "check digit ผิด", short: "ไม่ครบ 13 หลัก", long: "เกิน 13 หลัก", letters: "มีตัวอักษรปน" };
+  const ID_FORMAT = { id: "format", label: "รูปแบบ", kind: "seg", choices: [["plain", "ตัวเลขล้วน"], ["dash", "มีขีด"], ["space", "เว้นวรรค"]], def: "plain" };
+  const FIRST_DIGIT = [
+    ["any", "สุ่ม 1-8"],
+    ["1", "1 · คนไทย แจ้งเกิดตามกำหนด"],
+    ["2", "2 · คนไทย แจ้งเกิดเกินกำหนด"],
+    ["3", "3 · มีชื่อในทะเบียนบ้านก่อนปี 2527"],
+    ["4", "4 · ย้ายเข้าแต่ยังไม่มีเลข"],
+    ["5", "5 · ตกสำรวจ"],
+    ["6", "6 · ต่างด้าวอยู่ชั่วคราว"],
+    ["7", "7 · บุตรของผู้ถือเลขขึ้นต้น 6"],
+    ["8", "8 · ต่างด้าวได้สัญชาติไทย"],
   ];
 
+  const pickOne = (rng, arr) => arr[Math.floor(rng() * arr.length)];
+  // Decide whether this row is a negative case, and which kind.
+  function caseFor(o, rng) {
+    const kinds = o.bad && o.bad.length ? o.bad : null;
+    const invalid = o.case === "invalid" || (o.case === "mixed" && rng() < 0.5);
+    return invalid && kinds ? pickOne(rng, kinds) : null;
+  }
+  function formatId(v, f) {
+    if (!/^\d{13}$/.test(v)) return v;
+    if (f === "dash") return formatThaiId(v);
+    if (f === "space") return formatThaiId(v).replace(/-/g, " ");
+    return v;
+  }
+
+  const TYPES = [
+    { key: "citizen", group: "id", title: "เลขบัตรประชาชน", desc: "13 หลัก check digit ถูกต้อง เลือกกรณีผิดได้สำหรับเทส negative", keys: "citizen id national invalid negative ขีด",
+      controls: [CASE, ID_BAD, ID_FORMAT, { id: "first", label: "หลักแรก (ประเภทบุคคล)", kind: "select", choices: FIRST_DIGIT, def: "any", when: (o) => o.case !== "invalid" }],
+      gen: (td, o, rng) => {
+        const bad = caseFor(o, rng);
+        const valid = td.citizenId(o.first === "any" ? undefined : Number(o.first));
+        if (!bad) return { value: formatId(valid, o.format), ok: true, note: "บุคคลธรรมดา ประเภท " + valid[0] };
+        return { value: formatId(breakThaiId(td.random, valid, bad), o.format), ok: false, note: ID_NOTE[bad] };
+      } },
+    { key: "juristic", group: "id", title: "เลขผู้เสียภาษีนิติบุคคล", desc: "13 หลัก ขึ้นต้นด้วย 0 ใช้สูตร check digit เดียวกับบัตรประชาชน", keys: "นิติบุคคล บริษัท ภาษี tax juristic company",
+      controls: [CASE, ID_BAD, ID_FORMAT],
+      gen: (td, o, rng) => {
+        const bad = caseFor(o, rng);
+        const valid = td.juristicId();
+        if (!bad) return { value: formatId(valid, o.format), ok: true, note: "นิติบุคคล" };
+        return { value: formatId(breakThaiId(td.random, valid, bad), o.format), ok: false, note: ID_NOTE[bad] };
+      } },
+    { key: "phone", group: "phone", title: "เบอร์มือถือ", desc: "10 หลัก ขึ้นต้นด้วย 06, 08 หรือ 09", keys: "โทรศัพท์ มือถือ phone mobile tel e164 +66",
+      controls: [CASE,
+        { id: "bad", label: "ข้อมูลผิดแบบไหน", kind: "checks", when: (o) => o.case !== "valid",
+          choices: [["prefix", "ขึ้นต้นผิด (เช่น 02)"], ["short", "9 หลัก"], ["long", "11 หลัก"], ["letters", "มีตัวอักษรปน"]], def: ["prefix"] },
+        { id: "prefixes", label: "ขึ้นต้นด้วย", kind: "checks", choices: [["06", "06"], ["08", "08"], ["09", "09"]], def: ["06", "08", "09"], when: (o) => o.case !== "invalid" },
+        { id: "format", label: "รูปแบบ", kind: "seg", choices: [["plain", "0812345678"], ["dash", "081-234-5678"], ["e164", "+66812345678"]], def: "plain" }],
+      gen: (td, o, rng) => {
+        const bad = caseFor(o, rng);
+        const fmt = (v) => !/^0\d{9}$/.test(v) ? v : o.format === "dash" ? formatPhone(v) : o.format === "e164" ? toE164(v) : v;
+        if (!bad) return { value: fmt(td.phone(o.prefixes.length ? o.prefixes : undefined)), ok: true, note: "มือถือ" };
+        const note = { prefix: "ไม่ใช่เบอร์มือถือ", short: "ไม่ครบ 10 หลัก", long: "เกิน 10 หลัก", letters: "มีตัวอักษรปน" }[bad];
+        return { value: fmt(td.invalidPhone(bad)), ok: false, note };
+      } },
+    { key: "name", group: "name", title: "ชื่อ-นามสกุล", desc: "ชื่อไทยพร้อมคำนำหน้า หรือชื่อที่เขียนเป็นภาษาอังกฤษ", keys: "ชื่อ นามสกุล name thai english",
+      controls: [CASE,
+        { id: "bad", label: "ข้อมูลผิดแบบไหน", kind: "checks", when: (o) => o.case !== "valid",
+          choices: [["digits", "มีตัวเลขปน"], ["symbols", "มีอักขระพิเศษ"], ["long", "ยาวเกิน 100 ตัว"], ["blank", "มีแต่ช่องว่าง"]], def: ["digits", "symbols"] },
+        { id: "lang", label: "ภาษา", kind: "seg", choices: [["th", "ไทย"], ["en", "อังกฤษ"], ["both", "ทั้งสอง"]], def: "th" },
+        { id: "gender", label: "เพศ", kind: "seg", choices: [["any", "สุ่ม"], ["male", "ชาย"], ["female", "หญิง"]], def: "any" },
+        { id: "extra", label: "ใส่เพิ่ม", kind: "checks", choices: [["title", "คำนำหน้า"]], def: ["title"] }],
+      gen: (td, o, rng) => {
+        const n = td.name(o.gender === "any" ? undefined : o.gender);
+        const title = o.extra.includes("title");
+        const th = (title ? n.titleTh : "") + n.firstNameTh + " " + n.lastNameTh;
+        const en = (title ? n.titleEn + " " : "") + n.firstNameEn + " " + n.lastNameEn;
+        const name = o.lang === "en" ? en : o.lang === "both" ? `${th} / ${en}` : th;
+        const bad = caseFor(o, rng);
+        if (!bad) return { value: name, ok: true, note: "" };
+        if (bad === "digits") return { value: name.replace(" ", Math.floor(rng() * 900 + 100) + " "), ok: false, note: "มีตัวเลขปน" };
+        if (bad === "symbols") return { value: name.replace(" ", pickOne(rng, ["@", "#", "$", "%", "*", "!"]) + " "), ok: false, note: "มีอักขระพิเศษ" };
+        if (bad === "long") return { value: (name + " ").repeat(Math.ceil(110 / (name.length + 1))).trim(), ok: false, note: "ยาวเกิน 100 ตัว" };
+        return { value: "   ", ok: false, note: "มีแต่ช่องว่าง" };
+      } },
+    { key: "email", group: "name", title: "อีเมล", desc: "ใช้โดเมนที่สงวนไว้สำหรับตัวอย่าง ส่งอีเมลถึงใครจริงไม่ได้", keys: "email mail",
+      controls: [CASE,
+        { id: "bad", label: "ข้อมูลผิดแบบไหน", kind: "checks", when: (o) => o.case !== "valid",
+          choices: [["noAt", "ไม่มี @"], ["noDomain", "ไม่มีโดเมน"], ["space", "มีช่องว่าง"], ["doubleAt", "มี @ สองตัว"]], def: ["noAt", "noDomain"] },
+        { id: "domain", label: "โดเมน", kind: "seg", choices: [["example.com", "example.com"], ["example.org", "example.org"], ["example.net", "example.net"]], def: "example.com" },
+        { id: "extra", label: "ใส่เพิ่ม", kind: "checks", choices: [["number", "ตัวเลขท้ายชื่อ"], ["upper", "ตัวพิมพ์ใหญ่ปน"]], def: ["number"] }],
+      gen: (td, o, rng) => {
+        const n = td.name();
+        let user = `${n.firstNameEn}.${n.lastNameEn}`.toLowerCase();
+        if (o.extra.includes("number")) user += Math.floor(rng() * 9000 + 1000);
+        if (o.extra.includes("upper")) user = user[0].toUpperCase() + user.slice(1);
+        const bad = caseFor(o, rng);
+        if (!bad) return { value: `${user}@${o.domain}`, ok: true, note: "" };
+        const v = { noAt: `${user}${o.domain}`, noDomain: `${user}@`, space: `${user.replace(".", " ")}@${o.domain}`, doubleAt: `${user}@@${o.domain}` }[bad];
+        const note = { noAt: "ไม่มี @", noDomain: "ไม่มีโดเมน", space: "มีช่องว่าง", doubleAt: "มี @ สองตัว" }[bad];
+        return { value: v, ok: false, note };
+      } },
+    { key: "address", group: "address", title: "ที่อยู่", desc: "จังหวัด อำเภอ ตำบล และรหัสไปรษณีย์ตรงกันจริง", keys: "address บ้าน province district zip postal จังหวัด อำเภอ ตำบล รหัสไปรษณีย์",
+      controls: [
+        { id: "format", label: "รูปแบบ", kind: "seg", choices: [["full", "บรรทัดเดียว"], ["parts", "แยกช่อง"]], def: "full" },
+        { id: "region", label: "พื้นที่", kind: "seg", choices: [["any", "ทั้งหมด"], ["bkk", "กรุงเทพฯ"], ["upcountry", "ต่างจังหวัด"]], def: "any" },
+        { id: "extra", label: "ใส่เพิ่ม", kind: "checks", choices: [["road", "ถนน"], ["moo", "หมู่ (ต่างจังหวัด)"]], def: ["road", "moo"] }],
+      gen: (td, o) => {
+        let a = td.address();
+        for (let i = 0; i < 200 && o.region !== "any" && (a.provinceEn === "Bangkok") !== (o.region === "bkk"); i++) a = td.address();
+        const road = o.extra.includes("road") ? a.road : "";
+        const moo = o.extra.includes("moo") && a.moo ? a.moo : "";
+        if (o.format === "parts") return { "บ้านเลขที่": a.houseNo, "หมู่": moo || "-", "ถนน": road || "-", "ตำบล/แขวง": a.subdistrict, "อำเภอ/เขต": a.district, "จังหวัด": a.province, "รหัสไปรษณีย์": a.postalCode };
+        return [a.houseNo, moo && `หมู่ ${moo}`, road, a.subdistrict, a.district, a.province, a.postalCode].filter(Boolean).join(" ");
+      } },
+    { key: "birth", group: "date", title: "วันเกิด", desc: "เลือกช่วงอายุและรูปแบบ พ.ศ. หรือ ค.ศ. ได้", keys: "birth date วันเกิด พ.ศ. ค.ศ. iso buddhist",
+      controls: [CASE,
+        { id: "bad", label: "ข้อมูลผิดแบบไหน", kind: "checks", when: (o) => o.case !== "valid",
+          choices: [["impossible", "วันที่ไม่มีจริง (31/04)"], ["underage", "อายุไม่ถึงเกณฑ์"], ["future", "วันในอนาคต"], ["era", "ปีผิดศักราช"]], def: ["impossible", "underage"] },
+        { id: "format", label: "รูปแบบ", kind: "seg", choices: [["be", "วว/ดด/ปปปป (พ.ศ.)"], ["long", "5 มีนาคม 2535"], ["iso", "YYYY-MM-DD (ค.ศ.)"]], def: "be" },
+        { id: "minAge", label: "อายุต่ำสุด", kind: "number", def: 18, min: 0, max: 100 },
+        { id: "maxAge", label: "อายุสูงสุด", kind: "number", def: 65, min: 0, max: 120 }],
+      gen: (td, o, rng) => {
+        const MONTHS = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+        const pad = (n) => String(n).padStart(2, "0");
+        // y is the year to print; parts let us print dates that cannot exist.
+        const fmt = (d, m, y) => o.format === "iso" ? `${y}-${pad(m)}-${pad(d)}` : o.format === "long" ? `${d} ${MONTHS[m - 1]} ${y}` : `${pad(d)}/${pad(m)}/${y}`;
+        const yearOf = (ce) => o.format === "iso" ? ce : ce + 543;
+        const fromDate = (dt) => fmt(dt.getDate(), dt.getMonth() + 1, yearOf(dt.getFullYear()));
+        const min = Math.max(0, Math.min(o.minAge, o.maxAge)), max = Math.max(o.minAge, o.maxAge);
+        const bad = caseFor(o, rng);
+        if (!bad) return { value: fromDate(td.birthDate(min, max)), ok: true, note: `อายุ ${min}-${max} ปี` };
+        if (bad === "impossible") {
+          const [d, m] = pickOne(rng, [[31, 4], [31, 6], [31, 9], [31, 11], [30, 2], [32, 1], [15, 13]]);
+          return { value: fmt(d, m, yearOf(td.birthDate(min, max).getFullYear())), ok: false, note: "วันที่ไม่มีจริง" };
+        }
+        if (bad === "underage") {
+          if (min === 0) return { value: fromDate(td.birthDate(0, 0)), ok: false, note: "อายุไม่ถึงเกณฑ์ (ตั้งอายุต่ำสุดเป็น 0 อยู่)" };
+          return { value: fromDate(td.birthDate(0, min - 1)), ok: false, note: `อายุต่ำกว่า ${min} ปี` };
+        }
+        if (bad === "future") {
+          const dt = new Date(); dt.setDate(dt.getDate() + 1 + Math.floor(rng() * 365));
+          return { value: fromDate(dt), ok: false, note: "วันในอนาคต" };
+        }
+        const dt = td.birthDate(min, max);
+        const wrongYear = o.format === "iso" ? dt.getFullYear() + 543 : dt.getFullYear();
+        return { value: fmt(dt.getDate(), dt.getMonth() + 1, wrongYear), ok: false, note: o.format === "iso" ? "ใส่ปี พ.ศ. ในช่อง ค.ศ." : "ใส่ปี ค.ศ. ในช่อง พ.ศ." };
+      } },
+    { key: "person", group: "person", title: "บุคคลครบชุด", desc: "ทุกช่องเป็นของคนเดียวกัน เลือกได้ว่าจะเอาช่องไหน", keys: "person คน json ทั้งหมด",
+      controls: [
+        { id: "gender", label: "เพศ", kind: "seg", choices: [["any", "สุ่ม"], ["male", "ชาย"], ["female", "หญิง"]], def: "any" },
+        { id: "fields", label: "ช่องที่ต้องการ", kind: "checks",
+          choices: [["nameTh", "ชื่อไทย"], ["nameEn", "ชื่ออังกฤษ"], ["id", "เลขบัตร"], ["phone", "เบอร์"], ["email", "อีเมล"], ["birth", "วันเกิด"], ["address", "ที่อยู่"]],
+          def: ["nameTh", "id", "phone", "email", "birth", "address"] }],
+      gen: (td, o) => {
+        const p = td.person(o.gender === "any" ? undefined : o.gender);
+        const all = { nameTh: ["ชื่อ", p.fullNameTh], nameEn: ["Name", p.fullNameEn], id: ["เลขบัตร", p.citizenId], phone: ["เบอร์", p.phone],
+          email: ["อีเมล", p.email], birth: ["วันเกิด", p.birthDateBE], address: ["ที่อยู่", p.address.fullAddress] };
+        const fields = o.fields.length ? o.fields : ["nameTh"];
+        return Object.fromEntries(fields.map((f) => all[f]));
+      } },
+  ];
+
+  // Settings per type, kept while switching between types.
+  const settings = Object.fromEntries(TYPES.map((t) => [t.key, Object.fromEntries(t.controls.map((c) => [c.id, Array.isArray(c.def) ? [...c.def] : c.def]))]));
   let current = TYPES[0];
   let values = [];
 
   // Type list
   const typeButtons = [];
+  const groupLabels = [];
   Object.entries(GROUPS).forEach(([gKey, gLabel]) => {
     const label = document.createElement("div");
     label.className = "group-label";
     label.textContent = gLabel;
     $("typeList").appendChild(label);
-    const members = TYPES.filter((t) => t.group === gKey).map((t) => {
+    label.members = TYPES.filter((t) => t.group === gKey).map((t) => {
       const b = document.createElement("button");
       b.type = "button";
       b.className = "type";
       b.setAttribute("role", "option");
-      b.innerHTML = "<span></span>";
-      b.firstChild.textContent = t.title;
-      if (t.negative) b.insertAdjacentHTML("beforeend", '<span class="neg">negative</span>');
+      b.textContent = t.title;
       b.addEventListener("click", () => select(t));
       $("typeList").appendChild(b);
       const entry = { t, b, text: `${t.title} ${t.keys} ${gLabel}`.toLowerCase() };
       typeButtons.push(entry);
       return entry;
     });
-    label.members = members;
-    typeButtons.labels = (typeButtons.labels || []).concat(label);
+    groupLabels.push(label);
   });
   const noMatch = document.createElement("p");
   noMatch.className = "no-match";
@@ -402,7 +590,7 @@ test("ปฏิเสธเลขบัตรที่ผิด", async ({ page 
     const terms = e.target.value.toLowerCase().trim().split(/\s+/).filter(Boolean);
     let shown = 0;
     typeButtons.forEach((x) => { x.b.hidden = !terms.every((t) => x.text.includes(t)); if (!x.b.hidden) shown++; });
-    typeButtons.labels.forEach((l) => { l.hidden = l.members.every((m) => m.b.hidden); });
+    groupLabels.forEach((l) => { l.hidden = l.members.every((m) => m.b.hidden); });
     noMatch.hidden = shown > 0;
   });
   $("q").addEventListener("keydown", (e) => {
@@ -411,23 +599,99 @@ test("ปฏิเสธเลขบัตรที่ผิด", async ({ page 
     if (first) select(first.t);
   });
 
+  // Settings panel
+  function renderConfig() {
+    const o = settings[current.key];
+    const box = $("config");
+    box.replaceChildren();
+    current.controls.forEach((c) => {
+      if (c.when && !c.when(o)) return;
+      const group = document.createElement("fieldset");
+      group.className = "cfg cfg-" + c.kind;
+      const legend = document.createElement("legend");
+      legend.textContent = c.label;
+      group.appendChild(legend);
+      const name = `${current.key}-${c.id}`;
+
+      if (c.kind === "seg") {
+        const seg = document.createElement("div");
+        seg.className = "seg";
+        c.choices.forEach(([val, label]) => {
+          const id = `${name}-${val}`;
+          const input = Object.assign(document.createElement("input"), { type: "radio", name, id, value: val, checked: o[c.id] === val });
+          const lab = Object.assign(document.createElement("label"), { htmlFor: id, textContent: label });
+          if (c.id === "case") lab.dataset.case = val;
+          input.addEventListener("change", () => { o[c.id] = val; renderConfig(); generate(); });
+          seg.append(input, lab);
+        });
+        group.appendChild(seg);
+      } else if (c.kind === "checks") {
+        const list = document.createElement("div");
+        list.className = "checks";
+        c.choices.forEach(([val, label]) => {
+          const id = `${name}-${val}`;
+          const wrap = document.createElement("label");
+          wrap.className = "check";
+          wrap.htmlFor = id;
+          const input = Object.assign(document.createElement("input"), { type: "checkbox", id, value: val, checked: o[c.id].includes(val) });
+          input.addEventListener("change", () => {
+            o[c.id] = c.choices.map(([v]) => v).filter((v) => document.getElementById(`${name}-${v}`).checked);
+            generate();
+          });
+          wrap.append(input, document.createTextNode(label));
+          list.appendChild(wrap);
+        });
+        group.appendChild(list);
+        if (c.id === "bad") {
+          const hint = document.createElement("small");
+          hint.className = "cfg-hint";
+          hint.textContent = "ไม่ติ๊กเลย = ได้แต่ข้อมูลที่ถูก";
+          group.appendChild(hint);
+        }
+      } else if (c.kind === "select") {
+        const sel = document.createElement("select");
+        sel.id = name;
+        c.choices.forEach(([val, label]) => sel.appendChild(Object.assign(document.createElement("option"), { value: val, textContent: label, selected: o[c.id] === val })));
+        sel.addEventListener("change", () => { o[c.id] = sel.value; generate(); });
+        group.appendChild(sel);
+      } else if (c.kind === "number") {
+        const input = Object.assign(document.createElement("input"), { type: "number", id: name, min: c.min, max: c.max, value: o[c.id] });
+        input.addEventListener("change", () => {
+          o[c.id] = Math.min(c.max, Math.max(c.min, Number(input.value) || 0));
+          input.value = o[c.id];
+          generate();
+        });
+        group.appendChild(input);
+      }
+      box.appendChild(group);
+    });
+    box.hidden = box.childElementCount === 0;
+  }
+
   function select(t) {
     current = t;
     typeButtons.forEach((x) => x.b.setAttribute("aria-selected", String(x.t === t)));
     $("typeTitle").textContent = t.title;
     $("typeDesc").textContent = t.desc;
+    renderConfig();
     generate();
   }
+
+  // Results
+  const isRecord = (v) => v && typeof v === "object" && !("value" in v);
+  const plain = (v) => (v && typeof v === "object" && "value" in v ? v.value : v);
 
   function generate() {
     const count = Math.min(500, Math.max(1, Number($("count").value) || 1));
     const seedVal = $("seed").value;
     const td = createThaiData(seedVal === "" ? {} : { seed: Number(seedVal) });
-    values = Array.from({ length: count }, () => current.gen(td));
+    const rng = seedVal === "" ? Math.random : seededRng(Number(seedVal) + 7919);
+    const o = settings[current.key];
+    values = Array.from({ length: count }, () => current.gen(td, o, rng));
     const result = $("result");
     result.replaceChildren();
 
-    if (typeof values[0] === "object") {
+    if (isRecord(values[0])) {
       const cols = Object.keys(values[0]);
       const wrap = document.createElement("div");
       wrap.className = "table-wrap";
@@ -452,40 +716,54 @@ test("ปฏิเสธเลขบัตรที่ผิด", async ({ page 
 
     const list = document.createElement("ol");
     list.className = "rows";
-    values.forEach((v) => {
+    let bad = 0;
+    values.forEach((item) => {
+      const v = plain(item);
       const li = document.createElement("li");
       li.className = "row";
       li.tabIndex = 0;
-      li.innerHTML = '<span class="val"></span><span class="hint">คลิกเพื่อคัดลอก</span>';
+      li.innerHTML = '<span class="val"></span><span class="st"></span><span class="hint">คัดลอก</span>';
       const val = li.querySelector(".val");
-      val.textContent = v;
-      if (current.text) val.classList.add("text");
+      val.textContent = v.trim() === "" ? `"${v}"` : v;
+      if (/[ก-๙]/.test(v) && !/^\d/.test(v)) val.classList.add("text");
+      const st = li.querySelector(".st");
+      if (typeof item === "object") {
+        st.classList.add(item.ok ? "ok" : "bad");
+        st.textContent = item.ok ? "ถูก" : "ผิด · " + item.note;
+        st.title = item.ok ? item.note : "";
+        if (!item.ok) bad++;
+      }
       const doCopy = async () => {
-        if (!(await copy(v, `คัดลอก ${v}`))) return;
+        if (!(await copy(v, "คัดลอกแล้ว"))) return;
         li.classList.add("copied");
-        li.querySelector(".hint").textContent = "คัดลอกแล้ว ✓";
-        setTimeout(() => { li.classList.remove("copied"); li.querySelector(".hint").textContent = "คลิกเพื่อคัดลอก"; }, 1200);
+        li.querySelector(".hint").textContent = "✓";
+        setTimeout(() => { li.classList.remove("copied"); li.querySelector(".hint").textContent = "คัดลอก"; }, 1200);
       };
       li.addEventListener("click", doCopy);
       li.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); doCopy(); } });
       list.appendChild(li);
     });
     result.appendChild(list);
-    $("sheetFoot").textContent = `${count} รายการ · คลิกแถวเพื่อคัดลอกค่านั้น`;
+    const tally = typeof values[0] === "object" ? ` · ถูก ${count - bad} ผิด ${bad}` : "";
+    $("sheetFoot").textContent = `${count} รายการ${tally} · คลิกแถวเพื่อคัดลอกค่านั้น`;
   }
 
   const toCsv = () => {
     const esc = (s) => `"${String(s).replace(/"/g, '""')}"`;
-    if (typeof values[0] !== "object") return [esc(current.title), ...values.map(esc)].join("\n");
-    const cols = Object.keys(values[0]);
-    return [cols.map(esc).join(","), ...values.map((v) => cols.map((c) => esc(v[c])).join(","))].join("\n");
+    if (isRecord(values[0])) {
+      const cols = Object.keys(values[0]);
+      return [cols.map(esc).join(","), ...values.map((v) => cols.map((c) => esc(v[c])).join(","))].join("\n");
+    }
+    if (typeof values[0] === "object") return [["value", "expected", "reason"].map(esc).join(","), ...values.map((v) => [v.value, v.ok ? "valid" : "invalid", v.note].map(esc).join(","))].join("\n");
+    return ["value", ...values.map(esc)].join("\n");
   };
+  const toJson = () => JSON.stringify(values.map((v) => (v && typeof v === "object" && "value" in v ? { value: v.value, expected: v.ok ? "valid" : "invalid", reason: v.note } : v)), null, 2);
 
   $("regen").addEventListener("click", generate);
   $("count").addEventListener("change", generate);
   $("seed").addEventListener("change", generate);
-  $("copyAll").addEventListener("click", () => copy(typeof values[0] === "object" ? toCsv() : values.join("\n"), `คัดลอก ${values.length} รายการแล้ว`));
-  $("copyJson").addEventListener("click", () => copy(JSON.stringify(values, null, 2), "คัดลอก JSON แล้ว"));
+  $("copyAll").addEventListener("click", () => copy(isRecord(values[0]) ? toCsv() : values.map(plain).join("\n"), `คัดลอก ${values.length} รายการแล้ว`));
+  $("copyJson").addEventListener("click", () => copy(toJson(), "คัดลอก JSON แล้ว"));
   $("dlCsv").addEventListener("click", () => {
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob(["﻿" + toCsv()], { type: "text/csv;charset=utf-8" }));
