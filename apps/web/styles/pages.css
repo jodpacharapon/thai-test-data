@@ -1,0 +1,22 @@
+/* Text pages: Docs (code samples, API table) and Report (issue form). */
+
+/* Docs */
+pre { margin: 0; background: var(--well); border: 1px solid var(--rule); border-radius: 6px; padding: 14px 16px; overflow-x: auto; font: 0.86rem/1.65 var(--font-mono); }
+.code-block + .code-block { margin-top: 24px; }
+.code-block h2 { font: 600 1.05rem var(--font-head); margin: 0 0 8px; }
+.code-block p { margin: 0 0 10px; color: var(--sub); }
+.api { width: 100%; }
+.api td { white-space: normal; }
+.api td:first-child { width: auto; text-align: left; color: var(--ink); background: none; border-right: 0; font-size: 0.86rem; white-space: nowrap; }
+
+/* Report */
+.report { display: flex; flex-direction: column; gap: 18px; }
+.report .seg { align-self: flex-start; }
+.field-group { display: flex; flex-direction: column; gap: 14px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field span { font: 600 0.78rem var(--font-head); letter-spacing: 0.04em; color: var(--sub); }
+.field input, .field textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--rule-strong); border-radius: 6px; background: var(--well); font: 0.95rem/1.5 var(--font-body); resize: vertical; }
+.field textarea#bugSteps { font: 0.85rem/1.55 var(--font-mono); }
+.report-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.report-actions .btn { display: inline-flex; align-items: center; text-decoration: none; }
+.report-actions small { color: var(--sub); }

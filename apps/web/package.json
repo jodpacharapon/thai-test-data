@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "build": "npm run build -w thai-test-data && node scripts/build.mjs",
-    "dev": "npm run build && node scripts/serve.mjs 8080"
+    "dev": "npm run build && node scripts/serve.mjs 8080",
+    "test": "npm run build && node --test \"test/*.test.mjs\""
   },
   "dependencies": {
     "thai-test-data": "*"

@@ -16,6 +16,7 @@
     "build:data": "npm run build:data -w thai-test-data --",
     "dev": "npm run dev -w @thai-test-data/web",
     "test": "npm test -w thai-test-data",
+    "test:web": "npm test -w @thai-test-data/web",
     "typecheck": "npm run typecheck -w thai-test-data"
   }
 }

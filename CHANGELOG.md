@@ -9,8 +9,15 @@ Format อ้างอิง [Keep a Changelog](https://keepachangelog.com/en/1.
 
 - Release workflow: push version ใหม่เข้า `main` แล้วสร้าง tag, GitHub Release และ publish ขึ้น npm ให้อัตโนมัติ
 - Library: `td.unique(count, factory)` generate แบบไม่มีค่าซ้ำ
-- Web app: generate ได้สูงสุด 100,000 รายการ (ตารางแสดง 200 แถวแรก ส่วน copy และ export ได้ครบ)
+- Web app: generate ได้สูงสุด 100,000 รายการ เลื่อนดูได้ครบทุกแถวโดยหน้าเว็บไม่หน่วง (render เฉพาะแถวที่เห็นบนจอ)
+- Web app: ตัวกรองผลลัพธ์ ค้นหาแบบข้อความหรือ regex, กรอง Valid / Invalid พร้อมจำนวน, กรองตามสาเหตุที่ invalid, เลือกจำนวนแถวต่อหน้า (50 / 100 / 1,000 / 50,000 / ทั้งหมด) และเปลี่ยนหน้าได้ Copy, JSON และ CSV จะ export ตามตัวกรอง
+- Web app: ช่อง Count และ Seed ย้ายขึ้นไปด้านบน พร้อมปุ่มลัด 10 / 100 / 1K / 10K / 100K
+- Web app: หน้า Validator แบบ regex tester ตรวจได้ทีละหลายบรรทัด highlight ทุกบรรทัด มี gutter ✓/✗ บอกเหตุผล และคลิกดูวิธีคำนวณ รองรับเลขบัตร 13 หลัก เบอร์มือถือ รหัสไปรษณีย์ อีเมล วันที่ พ.ศ. และ Custom regex (มี flags และ capture groups)
 - Web app: ตัวเลือก Unique และไอคอน ⓘ อธิบาย Count, Seed, Unique และ settings ต่างๆ
+
+### Changed
+
+- Web app: แยก `app.js` และ `styles.css` เป็น ES modules ตาม feature ใน `src/` และ stylesheet ใน `styles/` พร้อม unit tests (`npm run test:web`) ที่รันใน CI
 
 ## [0.2.0] - 2026-10-27
 

@@ -30,6 +30,7 @@ Repo เป็น npm workspaces: library อยู่ที่ `packages/thai-t
 | Command | Description |
 |---|---|
 | `npm test` | run unit tests |
+| `npm run test:web` | run unit tests ของ web app |
 | `npm run typecheck` | type check |
 | `npm run build` | build library |
 | `npm run build:web` | build web app ไปที่ `apps/web/dist/` |
@@ -51,7 +52,7 @@ Repo เป็น npm workspaces: library อยู่ที่ `packages/thai-t
 2. ถ้ามี negative case ให้ทำ `invalidXxx(rng, kind)` คู่กับ `isValidXxx(value)`
 3. export จาก `src/index.ts` และเพิ่ม method ใน `createThaiData()`
 4. เขียน test ใน `packages/thai-test-data/test/` ทั้ง valid และ invalid ครบทุก `kind`
-5. เพิ่ม data type ใน web app (`TYPES` ใน `apps/web/app.js`) พร้อม option ใน settings panel
+5. เพิ่ม data type ใน web app (`TYPES` ใน `apps/web/src/generator/types.js`) พร้อม option ใน settings panel ถ้ามีวิธี validate ให้เพิ่มกฎใน `apps/web/src/validator/rules.js` ด้วย
 6. update API Reference ใน `README.md`, ตาราง API ในหน้า Docs และ `CHANGELOG.md`
 
 ## Pull requests

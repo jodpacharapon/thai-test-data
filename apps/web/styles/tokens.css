@@ -1,0 +1,24 @@
+/* Design tokens: colors and type. Dark mode follows the OS unless the theme toggle chose one. */
+:root {
+  --paper: #f3f4f1; --panel: #ffffff; --well: #f7f8f6; --ink: #17202b; --sub: #5a6470;
+  --rule: #d9ddd8; --rule-strong: #b9bfb8; --navy: #22336b; --navy-ink: #ffffff; --navy-tint: #e7eaf4;
+  --red: #b3261e; --red-tint: #fbe9e7; --green: #1d6b45; --green-tint: #e3f1e9;
+  --font-head: "Chakra Petch", "Sarabun", system-ui, sans-serif;
+  --font-body: "Sarabun", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", "Sarabun", ui-monospace, monospace;
+  --fast: 120ms; --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #121416; --panel: #1a1d20; --well: #16191b; --ink: #e6e8e5; --sub: #9aa2a8;
+    --rule: #2c3135; --rule-strong: #444b50; --navy: #9fb2f0; --navy-ink: #0e1430; --navy-tint: #1f2742;
+    --red: #f2867d; --red-tint: #3a1a17; --green: #79d0a3; --green-tint: #15301f; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #121416; --panel: #1a1d20; --well: #16191b; --ink: #e6e8e5; --sub: #9aa2a8;
+  --rule: #2c3135; --rule-strong: #444b50; --navy: #9fb2f0; --navy-ink: #0e1430; --navy-tint: #1f2742;
+  --red: #f2867d; --red-tint: #3a1a17; --green: #79d0a3; --green-tint: #15301f; color-scheme: dark;
+}
+:root[data-theme="light"] { color-scheme: light; }
+

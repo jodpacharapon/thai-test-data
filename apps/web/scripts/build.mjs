@@ -4,8 +4,8 @@ import { cpSync, existsSync, mkdirSync, rmSync } from "node:fs";
 const here = (p) => new URL(`../${p}`, import.meta.url);
 rmSync(here("dist"), { recursive: true, force: true });
 mkdirSync(here("dist"));
-for (const file of ["index.html", "styles.css", "app.js"]) {
-  if (existsSync(here(file))) cpSync(here(file), here(`dist/${file}`));
+for (const entry of ["index.html", "src", "styles"]) {
+  if (existsSync(here(entry))) cpSync(here(entry), here(`dist/${entry}`), { recursive: true });
 }
 cpSync(new URL("../../../packages/thai-test-data/dist", import.meta.url), here("dist/lib"), { recursive: true });
 console.log("Built apps/web/dist");

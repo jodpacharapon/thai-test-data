@@ -8,7 +8,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles/tokens.css">
+<link rel="stylesheet" href="styles/base.css">
+<link rel="stylesheet" href="styles/generator.css">
+<link rel="stylesheet" href="styles/validator.css">
+<link rel="stylesheet" href="styles/pages.css">
 </head>
 <body>
 <header class="bar">
@@ -60,43 +64,114 @@
           <h1 id="typeTitle"></h1>
           <p id="typeDesc"></p>
         </div>
-        <div class="config" id="config"></div>
-        <div class="options">
-          <span class="opt"><label for="count">Count</label> <input id="count" type="number" min="1" max="100000" value="10"><button class="info" type="button" aria-label="Count คืออะไร" data-tip="จำนวนรายการที่จะ generate (สูงสุด 100,000) ตารางแสดงแค่ 200 แถวแรก แต่ Copy all, JSON และ CSV ได้ครบทุกแถว">i</button></span>
-          <span class="opt"><label for="seed">Seed</label> <input id="seed" type="number" placeholder="สุ่ม"><button class="info" type="button" aria-label="Seed คืออะไร" data-tip="ตัวเลขตั้งต้นของการสุ่ม ใส่ seed เดิม (เช่น 42) จะได้ data ชุดเดิมทุกครั้ง ใช้ reproduce test ที่ fail หรือให้ทั้งทีมใช้ data ชุดเดียวกัน ปล่อยว่าง = สุ่มใหม่ทุกครั้ง">i</button></span>
-          <span class="opt"><label class="check" for="unique"><input type="checkbox" id="unique">Unique</label><button class="info" type="button" aria-label="Unique คืออะไร" data-tip="ไม่ให้มีค่าซ้ำในชุดเดียวกัน เหมาะกับ field ที่ database ตั้ง unique constraint ถ้าค่าที่เป็นไปได้มีน้อยกว่าที่ขอ จะได้เท่าที่มี">i</button></span>
+        <div class="run">
+          <div class="run-field">
+            <label for="count">Count <button class="info" type="button" aria-label="Count คืออะไร" data-tip="จำนวนรายการที่จะ generate (สูงสุด 100,000) ตารางผลลัพธ์เลื่อนดูได้ครบทุกแถว Copy all, JSON และ CSV ได้ครบเช่นกัน">i</button></label>
+            <input id="count" type="number" inputmode="numeric" min="1" max="100000" value="100">
+            <div class="presets" aria-label="จำนวนที่ใช้บ่อย">
+              <button type="button" data-count="10">10</button><button type="button" data-count="100">100</button><button type="button" data-count="1000">1K</button><button type="button" data-count="10000">10K</button><button type="button" data-count="100000">100K</button>
+            </div>
+          </div>
+          <div class="run-field">
+            <label for="seed">Seed <button class="info" type="button" aria-label="Seed คืออะไร" data-tip="ตัวเลขตั้งต้นของการสุ่ม ใส่ seed เดิม (เช่น 42) จะได้ data ชุดเดิมทุกครั้ง ใช้ reproduce test ที่ fail หรือให้ทั้งทีมใช้ data ชุดเดียวกัน ปล่อยว่าง = สุ่มใหม่ทุกครั้ง">i</button></label>
+            <input id="seed" type="number" inputmode="numeric" placeholder="ว่าง = สุ่มใหม่">
+          </div>
+          <div class="run-field run-check">
+            <label class="check" for="unique"><input type="checkbox" id="unique">Unique <button class="info" type="button" aria-label="Unique คืออะไร" data-tip="ไม่ให้มีค่าซ้ำในชุดเดียวกัน เหมาะกับ field ที่ database ตั้ง unique constraint ถ้าค่าที่เป็นไปได้มีน้อยกว่าที่ขอ จะได้เท่าที่มี">i</button></label>
+          </div>
           <button class="btn main" id="regen" type="button">Generate</button>
+          <small class="shortfall" id="shortfall" aria-live="polite"></small>
+        </div>
+        <div class="config" id="config"></div>
+        <div class="filters">
+          <div class="search">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input id="rq" type="search" placeholder="ค้นหาในผลลัพธ์" aria-label="ค้นหาในผลลัพธ์" autocomplete="off" spellcheck="false">
+            <button class="regex-toggle" id="rqRegex" type="button" aria-pressed="false" title="ค้นหาด้วย regex">.*</button>
+          </div>
+          <div id="statusFilter" hidden></div>
+          <select class="reason" id="reasonFilter" aria-label="กรองตามสาเหตุที่ invalid" hidden></select>
           <span class="spacer"></span>
           <button class="btn" id="copyAll" type="button">Copy all</button>
           <button class="btn" id="copyJson" type="button">JSON</button>
           <button class="btn" id="dlCsv" type="button">CSV</button>
+          <small class="filter-error" id="rqError" aria-live="polite"></small>
         </div>
-        <div id="result"></div>
-        <div class="sheet-foot" id="sheetFoot">คลิกแถวเพื่อ copy</div>
+        <div class="pagebar">
+          <span class="opt">แถวต่อหน้า</span>
+          <div id="pageSize"></div>
+          <span class="spacer"></span>
+          <div class="pager" id="pager" hidden>
+            <button class="btn icon" id="pagePrev" type="button" aria-label="หน้าก่อน">‹</button>
+            <span id="pageInfo"></span>
+            <button class="btn icon" id="pageNext" type="button" aria-label="หน้าถัดไป">›</button>
+          </div>
+        </div>
+        <div class="result-scroll" id="resultScroll"></div>
+        <p class="result-empty" id="resultEmpty" hidden>ไม่มีแถวที่ตรงกับตัวกรอง</p>
+        <div class="sheet-foot" id="sheetFoot"></div>
       </div>
     </div>
   </section>
 
   <!-- Validate -->
-  <section class="view wrap narrow" id="view-validate" hidden>
-    <h1 class="page-title">Validate เลขบัตร 13 หลัก</h1>
-    <p class="page-lead">ใช้ได้ทั้งเลขบัตรประชาชนและเลขผู้เสียภาษีนิติบุคคล จะพิมพ์ขีดหรือไม่ก็ได้</p>
-    <div class="card">
-      <input class="id-input" id="idInput" value="1-2345-67890-12-1" inputmode="numeric" autocomplete="off" aria-label="เลข 13 หลัก">
-      <div class="verdict" id="verdict" aria-live="polite"></div>
-      <div class="calc" id="calc">
-        <h2>Check digit calculation</h2>
-        <div class="calc-grid" id="calcGrid"></div>
-        <p class="calc-steps" id="calcSteps"></p>
-      </div>
-    </div>
+  <section class="view wrap" id="view-validate" hidden>
+    <h1 class="page-title">Validator</h1>
+    <p class="page-lead">ตรวจทีละหลายค่าแบบ regex tester วางค่าบรรทัดละ 1 ค่า ทุกบรรทัดจะถูก highlight พร้อมบอกเหตุผล คลิกบรรทัดเพื่อดูวิธีคำนวณ</p>
 
-    <h2 class="page-title sub-title">Validate รหัสไปรษณีย์</h2>
-    <p class="page-lead">เช็กว่ารหัสมีใช้จริงไหม และเป็นของตำบล อำเภอ จังหวัดไหน</p>
-    <div class="card">
-      <input class="id-input" id="zipInput" value="50200" inputmode="numeric" autocomplete="off" aria-label="รหัสไปรษณีย์ 5 หลัก">
-      <div class="verdict" id="zipVerdict" aria-live="polite"></div>
-      <div class="table-wrap zip-areas" id="zipAreas"></div>
+    <div class="vx">
+      <div class="vx-rules" id="vxRules"></div>
+
+      <div class="card vx-pattern">
+        <div class="vx-pattern-top">
+          <span class="vx-label">Pattern</span>
+          <span class="vx-hint" id="vxHint"></span>
+        </div>
+        <div class="pattern-bar" id="vxPatternBar">
+          <span class="slash" aria-hidden="true">/</span>
+          <input id="vxPattern" aria-label="Regular expression" autocomplete="off" spellcheck="false">
+          <span class="slash" aria-hidden="true">/</span>
+          <input id="vxFlags" class="flags" aria-label="Flags" placeholder="flags" autocomplete="off" spellcheck="false" maxlength="8">
+        </div>
+        <div class="vx-pattern-foot">
+          <div class="chips" id="vxChecks"></div>
+          <label class="check" id="vxFullWrap" hidden><input type="checkbox" id="vxFull">ต้องตรงทั้งบรรทัด (^…$)</label>
+          <button class="btn small" id="vxEditPattern" type="button">แก้ pattern นี้เอง</button>
+          <small class="filter-error" id="vxPatternError" aria-live="polite"></small>
+        </div>
+      </div>
+
+      <div class="vx-grid">
+        <div class="card vx-input">
+          <div class="vx-head">
+            <span class="vx-label">Test values <small>บรรทัดละ 1 ค่า</small></span>
+            <span class="spacer"></span>
+            <button class="btn small" id="vxSample" type="button">สุ่มตัวอย่าง</button>
+            <button class="btn small" id="vxClear" type="button">ล้าง</button>
+          </div>
+          <div class="editor">
+            <div class="gutter" id="vxGutter" aria-hidden="true"></div>
+            <div class="editor-area">
+              <div class="hl" id="vxHl" aria-hidden="true"></div>
+              <textarea id="vxInput" wrap="off" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="ค่าที่จะตรวจ บรรทัดละ 1 ค่า"></textarea>
+            </div>
+          </div>
+          <div class="vx-summary" id="vxSummary" aria-live="polite"></div>
+          <small class="vx-limit" id="vxLimit"></small>
+        </div>
+
+        <div class="card vx-results">
+          <div class="vx-head">
+            <div id="vxFilter"></div>
+            <span class="spacer"></span>
+            <button class="btn small" id="vxCopyOk" type="button">Copy ที่ผ่าน</button>
+            <button class="btn small" id="vxCopyBad" type="button">Copy ที่ไม่ผ่าน</button>
+          </div>
+          <ol class="vx-list" id="vxList"></ol>
+          <p class="result-empty" id="vxEmpty" hidden></p>
+          <div class="vx-detail" id="vxDetail"></div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -207,6 +282,6 @@ test("ปฏิเสธเลขบัตรที่ผิด", async ({ page 
 </footer>
 <div class="toast" id="toast" role="status"></div>
 
-<script type="module" src="app.js"></script>
+<script type="module" src="src/main.js"></script>
 </body>
 </html>

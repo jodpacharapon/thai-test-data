@@ -201,8 +201,14 @@ thai-test-data/
 ├── apps/
 │   └── web/                     # web app (deploy บน Vercel)
 │       ├── index.html
-│       ├── styles.css
-│       ├── app.js
+│       ├── src/                 # ES modules (โหลดตรงใน browser ไม่ต้อง bundle)
+│       │   ├── main.js          # entry: ต่อทุก view เข้าด้วยกัน
+│       │   ├── core/            # DOM helpers, theme, routing, tooltips, regex
+│       │   ├── generator/       # data types, ตัวกรองผลลัพธ์, virtual list, export
+│       │   ├── validator/       # กฎตรวจแต่ละแบบ และหน้า regex tester
+│       │   └── report/          # ฟอร์มเปิด GitHub issue
+│       ├── styles/              # tokens, base, generator, validator, pages
+│       ├── test/                # unit tests ของ web app (node:test)
 │       └── scripts/             # build และ dev server
 ├── docs/                        # รูปใน README
 └── vercel.json                  # build web app จาก root
@@ -221,6 +227,7 @@ npm install
 | Command | Description |
 |---|---|
 | `npm test` | run unit tests ของ library |
+| `npm run test:web` | build แล้ว run unit tests ของ web app (filter, export, validator rules) |
 | `npm run typecheck` | type check |
 | `npm run build` | build library ไปที่ `packages/thai-test-data/dist/` |
 | `npm run build:web` | build library แล้วรวมกับ web app ไปที่ `apps/web/dist/` |
