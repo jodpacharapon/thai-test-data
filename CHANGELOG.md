@@ -7,19 +7,47 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
-### Added
+## [0.4.0] - 2026-10-27
+
+### English
+
+Names are now varied enough for 100,000 rows, and titles come in adult and child sets. Existing calls work as before, but the same seed now gives different names than 0.3.x.
+
+**Added: library**
+
+- `td.name({ titles: "child" })` uses child titles (เด็กชาย / Master, เด็กหญิง / Miss). `td.name("male")` still works.
+- Adult titles add นาง / Mrs., mixed at random with นางสาว / Ms.
+- `td.unique()` takes options `{ maxAttempts, partial, key }`. With `partial: true` it returns what it found instead of throwing; `maxAttempts` can still be passed as a plain number.
+
+**Added: web app**
+
+- A "คำนำหน้าแบบ" setting (adult / child) for the name type.
+
+**Changed**
+
+- Many more names: 198 male and 159 female given names, and surnames built from two parts (e.g. ศรี + สุข) for about 1,900 surnames. Before, there were only about 288 distinct full names.
+- English spellings are mixed the way people really write them, e.g. Kittipong / Kittiphong, Srisuk / Sisook.
+- The web app's Unique option now uses the library's `td.unique()` instead of its own copy of the same logic.
+
+### ภาษาไทย
+
+ชื่อหลากหลายพอสำหรับหลักแสนแถวแล้ว และคำนำหน้ามีทั้งแบบผู้ใหญ่และเด็ก วิธีเรียกแบบเดิมยังใช้ได้ แต่ seed เดิมจะได้ชื่อไม่เหมือน 0.3.x
+
+**เพิ่ม: library**
 
 - `td.name({ titles: "child" })` ใช้คำนำหน้าเด็ก (เด็กชาย / Master, เด็กหญิง / Miss) ส่วน `td.name("male")` แบบเดิมยังใช้ได้
-- คำนำหน้า นาง / Mrs. ในแบบผู้ใหญ่ สุ่มปนกับ นางสาว / Ms.
-- `td.unique()` รับ options `{ maxAttempts, partial, key }` โดย `partial: true` คืนเท่าที่หาได้แทนการ throw (ส่ง `maxAttempts` เป็นตัวเลขแบบเดิมได้)
-- Web app: ตั้งค่า "คำนำหน้าแบบ" ผู้ใหญ่ / เด็ก ในชนิดข้อมูลชื่อ-นามสกุล
+- คำนำหน้าแบบผู้ใหญ่เพิ่ม นาง / Mrs. สุ่มปนกับ นางสาว / Ms.
+- `td.unique()` รับ options `{ maxAttempts, partial, key }` ใส่ `partial: true` จะคืนค่าเท่าที่หาได้แทนการ throw และยังส่ง `maxAttempts` เป็นตัวเลขแบบเดิมได้
 
-### Changed
+**เพิ่ม: web app**
 
-- ชื่อเยอะขึ้นมาก: ชื่อชาย 198 ชื่อ ชื่อหญิง 159 ชื่อ และนามสกุลประกอบจากสองส่วน (เช่น ศรี + สุข) ได้ราว 1,900 นามสกุล จากเดิมที่มีชื่อเต็มไม่ซ้ำแค่ราว 288 ชื่อ
-- ชื่อภาษาอังกฤษสะกดหลายแบบปนกัน เช่น Kittipong / Kittiphong, Srisuk / Sisook
-- ข้อมูลที่สร้างด้วย seed เดิมจะได้ชื่อไม่เหมือนเวอร์ชันก่อน
-- Web app: โหมด Unique เรียกใช้ `td.unique()` ของ library แทนการเขียนซ้ำเอง
+- ตั้งค่า "คำนำหน้าแบบ" ผู้ใหญ่ / เด็ก ในชนิดข้อมูลชื่อ-นามสกุล
+
+**เปลี่ยน**
+
+- ชื่อเยอะขึ้นมาก ชื่อชาย 198 ชื่อ ชื่อหญิง 159 ชื่อ และนามสกุลประกอบจากสองส่วน (เช่น ศรี + สุข) ได้ราว 1,900 นามสกุล จากเดิมที่มีชื่อเต็มไม่ซ้ำแค่ราว 288 ชื่อ
+- ชื่อภาษาอังกฤษสะกดหลายแบบปนกันเหมือนที่คนเขียนจริง เช่น Kittipong / Kittiphong, Srisuk / Sisook
+- โหมด Unique ในเว็บเรียกใช้ `td.unique()` ของ library แทนโค้ดที่เขียนซ้ำไว้เอง
 
 ## [0.3.1] - 2026-10-27
 
@@ -195,7 +223,8 @@ Release แรก
 - Validator เลขบัตรพร้อมแสดงวิธีคำนวณ check digit และ validator รหัสไปรษณีย์
 - หน้า Docs, light/dark mode, responsive บนมือถือ
 
-[Unreleased]: https://github.com/jodpacharapon/thai-test-data/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/jodpacharapon/thai-test-data/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/jodpacharapon/thai-test-data/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/jodpacharapon/thai-test-data/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/jodpacharapon/thai-test-data/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/jodpacharapon/thai-test-data/compare/v0.1.0...v0.2.0
