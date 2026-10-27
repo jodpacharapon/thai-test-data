@@ -184,6 +184,10 @@
   .calc-grid .last { border-bottom: 0; }
   .calc-steps { margin: 12px 0 0; font: 0.92rem/1.8 var(--font-mono); color: var(--sub); }
   .calc-steps b { color: var(--ink); }
+  .sub-title { margin-top: 36px; font-size: 1.35rem; }
+  .zip-areas { margin-top: 16px; border: 1px solid var(--rule); border-radius: 6px; max-height: 320px; overflow-y: auto; }
+  .zip-areas:empty { display: none; }
+  .zip-areas th:first-child, .zip-areas td:first-child { width: auto; text-align: left; color: var(--ink); font-family: var(--font-body); font-size: 0.92rem; background: none; border-right: 0; }
 
   /* Code view */
   pre { margin: 0; background: var(--well); border: 1px solid var(--rule); border-radius: 6px; padding: 14px 16px; overflow-x: auto; font: 0.86rem/1.65 var(--font-mono); }
@@ -282,6 +286,14 @@
         <p class="calc-steps" id="calcSteps"></p>
       </div>
     </div>
+
+    <h2 class="page-title sub-title">ตรวจรหัสไปรษณีย์</h2>
+    <p class="page-lead">บอกว่ารหัสมีใช้จริงไหม และเป็นของตำบล อำเภอ จังหวัดไหน</p>
+    <div class="card">
+      <input class="id-input" id="zipInput" value="50200" inputmode="numeric" autocomplete="off" aria-label="รหัสไปรษณีย์ 5 หลัก">
+      <div class="verdict" id="zipVerdict" aria-live="polite"></div>
+      <div class="table-wrap zip-areas" id="zipAreas"></div>
+    </div>
   </section>
 
   <!-- Code -->
@@ -330,10 +342,14 @@ test("ปฏิเสธเลขบัตรที่ผิด", async ({ page 
             <tr><td>td.invalidPhone(kind?)</td><td>เบอร์ที่ผิด: "prefix" | "short" | "long" | "letters"</td></tr>
             <tr><td>td.name("male" | "female")</td><td>ชื่อ-นามสกุลไทยและอังกฤษ</td></tr>
             <tr><td>td.address(options?)</td><td>ที่อยู่ครบ 77 จังหวัด 7,436 ตำบล รหัสไปรษณีย์ตรงกัน กรองได้ เช่น { province: "เชียงใหม่" } หรือ { bangkok: false }</td></tr>
+            <tr><td>td.postalCode(options?)</td><td>รหัสไปรษณีย์ที่มีใช้จริง กรองจังหวัดได้เหมือน address()</td></tr>
+            <tr><td>td.invalidPostalCode(kind?)</td><td>รหัสไปรษณีย์ที่ผิด: "unknown" | "short" | "long" | "letters"</td></tr>
+            <tr><td>lookupPostalCode(code)</td><td>ดูว่ารหัสนี้เป็นของตำบล อำเภอ จังหวัดไหน</td></tr>
             <tr><td>td.birthDate(min, max)</td><td>วันเกิดตามช่วงอายุ</td></tr>
             <tr><td>td.person()</td><td>ข้อมูลบุคคลครบชุด</td></tr>
             <tr><td>td.many(n, fn)</td><td>สร้างทีละหลายรายการ</td></tr>
             <tr><td>isValidThaiId(value)</td><td>ตรวจเลข 13 หลัก</td></tr>
+            <tr><td>isValidPostalCode(code)</td><td>ตรวจว่ารหัสไปรษณีย์มีใช้จริง</td></tr>
           </tbody>
         </table>
       </div>
@@ -353,7 +369,7 @@ test("ปฏิเสธเลขบัตรที่ผิด", async ({ page 
 <div class="toast" id="toast" role="status"></div>
 
 <script type="module">
-  import { createThaiData, seededRng, breakThaiId, LOCALITIES, PROVINCES, isValidThaiId, thaiIdCheckDigit, formatThaiId, formatPhone, toE164 } from "./lib/index.js";
+  import { createThaiData, seededRng, breakThaiId, LOCALITIES, PROVINCES, lookupPostalCode, isValidThaiId, thaiIdCheckDigit, formatThaiId, formatPhone, toE164 } from "./lib/index.js";
 
   const $ = (id) => document.getElementById(id);
 
@@ -542,6 +558,26 @@ test("ปฏิเสธเลขบัตรที่ผิด", async ({ page 
         }
         return { value, ok: !bad, note };
       } },
+    { key: "postal", group: "address", title: "รหัสไปรษณีย์", desc: "รหัสที่ใช้งานจริงทั่วประเทศ เลือกจังหวัดได้ หรือสุ่มรหัสที่ไม่มีอยู่จริงสำหรับเทส negative", keys: "zip postal code รหัสไปรษณีย์ ไปรษณีย์",
+      controls: [CASE,
+        { id: "bad", label: "ข้อมูลผิดแบบไหน", kind: "checks", when: (o) => o.case !== "valid",
+          choices: [["unknown", "5 หลักแต่ไม่มีอยู่จริง"], ["short", "4 หลัก"], ["long", "6 หลัก"], ["letters", "มีตัวอักษรปน"]], def: ["unknown"] },
+        { id: "province", label: "จังหวัด", kind: "select", def: "any", when: (o) => o.case !== "invalid",
+          choices: [["any", "ทุกจังหวัด"], ["upcountry", "ทุกจังหวัดยกเว้นกรุงเทพฯ"], ...PROVINCES.map((p) => [p.th, p.th])] }],
+      gen: (td, o, rng) => {
+        const bad = caseFor(o, rng);
+        if (bad) {
+          const note = { unknown: "ไม่มีรหัสนี้", short: "ไม่ครบ 5 หลัก", long: "เกิน 5 หลัก", letters: "มีตัวอักษรปน" }[bad];
+          return { value: td.invalidPostalCode(bad), ok: false, note };
+        }
+        const opts = o.province === "any" ? {} : o.province === "upcountry" ? { bangkok: false } : { province: o.province };
+        const code = td.postalCode(opts);
+        // Some codes span provinces (83000 is Phuket and Ko Yao, Phang Nga); list the chosen province first.
+        const area = [...lookupPostalCode(code)].sort((x, y) => (y.province === o.province) - (x.province === o.province));
+        const provinces = [...new Set(area.map((l) => l.province))];
+        const districts = [...new Set(area.map((l) => l.district))];
+        return { value: code, ok: true, note: "", okNote: `${districts[0]}${districts.length > 1 ? ` +${districts.length - 1}` : ""} ${provinces.join(", ")}` };
+      } },
     { key: "birth", group: "date", title: "วันเกิด", desc: "เลือกช่วงอายุและรูปแบบ พ.ศ. หรือ ค.ศ. ได้", keys: "birth date วันเกิด พ.ศ. ค.ศ. iso buddhist",
       controls: [CASE,
         { id: "bad", label: "ข้อมูลผิดแบบไหน", kind: "checks", when: (o) => o.case !== "valid",
@@ -718,7 +754,7 @@ test("ปฏิเสธเลขบัตรที่ผิด", async ({ page 
   const norm = (it) => (it && typeof it === "object" && "value" in it ? it : { value: it });
   const hasCase = () => values.length > 0 && values[0].ok !== undefined;
   const isTable = () => values.length > 0 && typeof values[0].value === "object";
-  const statusText = (r) => (r.ok ? "ถูก" : "ผิด · " + r.note);
+  const statusText = (r) => (r.ok ? (r.okNote ? "ถูก · " + r.okNote : "ถูก") : "ผิด · " + r.note);
 
   function generate() {
     const count = Math.min(500, Math.max(1, Number($("count").value) || 1));
@@ -876,6 +912,41 @@ test("ปฏิเสธเลขบัตรที่ผิด", async ({ page 
 
   $("idInput").addEventListener("input", validate);
   validate();
+
+  function validateZip() {
+    const raw = $("zipInput").value.trim();
+    const code = raw.replace(/\s/g, "");
+    const verdict = $("zipVerdict"), areas = $("zipAreas");
+    verdict.replaceChildren();
+    areas.replaceChildren();
+    if (!raw) { verdict.className = "verdict"; return; }
+    const found = lookupPostalCode(code);
+    const stamp = document.createElement("span");
+    stamp.className = "stamp";
+    const note = document.createElement("small");
+    if (!/^\d{5}$/.test(code)) {
+      stamp.textContent = /\D/.test(code) ? "มีตัวอักษรปน" : "ต้องมี 5 หลัก";
+      note.textContent = /\D/.test(code) ? "รหัสไปรษณีย์มีแต่ตัวเลข" : `ตอนนี้มี ${code.length} หลัก`;
+    } else if (!found.length) {
+      stamp.textContent = "ไม่มีรหัสนี้";
+      const near = [...new Set(LOCALITIES.filter((l) => l.postalCode.startsWith(code.slice(0, 2))).map((l) => l.province))];
+      note.textContent = near.length ? `รหัสที่ขึ้นต้นด้วย ${code.slice(0, 2)} เป็นของ${near.join(", ")}` : "";
+    } else {
+      stamp.textContent = "มีใช้จริง";
+      const provinces = [...new Set(found.map((l) => l.province))];
+      note.textContent = `${found.length} ตำบล/แขวง ใน${provinces.join(", ")}`;
+      const table = document.createElement("table");
+      const head = table.createTHead().insertRow();
+      ["ตำบล/แขวง", "อำเภอ/เขต", "จังหวัด"].forEach((c) => { const th = document.createElement("th"); th.textContent = c; head.appendChild(th); });
+      const body = table.createTBody();
+      found.forEach((l) => { const tr = body.insertRow(); [l.subdistrict, l.district, l.province].forEach((t) => { tr.insertCell().textContent = t; }); });
+      areas.appendChild(table);
+    }
+    verdict.className = "verdict " + (found.length ? "ok" : "bad");
+    verdict.append(stamp, note);
+  }
+  $("zipInput").addEventListener("input", validateZip);
+  validateZip();
 </script>
 </body>
 </html>

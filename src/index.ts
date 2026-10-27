@@ -3,11 +3,13 @@ import { breakThaiId, citizenId, invalidCitizenId, juristicId, type InvalidIdKin
 import { invalidMobilePhone, mobilePhone, type InvalidPhoneKind, type MobilePrefix } from "./phone.js";
 import { personName, type Gender, type PersonName } from "./name.js";
 import { address, type Address, type AddressOptions } from "./address.js";
+import { invalidPostalCode, postalCode, type InvalidPostalKind } from "./postal.js";
 import { birthDate, formatIsoDate, formatThaiDate } from "./date.js";
 
 export * from "./id.js";
 export * from "./phone.js";
 export * from "./date.js";
+export { INVALID_POSTAL_KINDS, POSTAL_CODES, isValidPostalCode, lookupPostalCode, type InvalidPostalKind } from "./postal.js";
 export { LOCALITIES, PROVINCES, type Address, type AddressOptions, type Locality } from "./address.js";
 export type { Gender, PersonName } from "./name.js";
 export { seededRng, type Rng } from "./random.js";
@@ -46,6 +48,10 @@ export function createThaiData(options: ThaiDataOptions = {}) {
     name: (gender?: Gender) => personName(rng, gender),
     /** Address whose subdistrict, district, province and postal code belong together. */
     address: (options?: AddressOptions) => address(rng, options),
+    /** Real postal code, optionally limited like address(), e.g. postalCode({ province: "ภูเก็ต" }). */
+    postalCode: (options?: AddressOptions) => postalCode(rng, options),
+    /** Postal code that fails validation: "unknown" (default), "short", "long" or "letters". */
+    invalidPostalCode: (kind?: InvalidPostalKind) => invalidPostalCode(rng, kind),
     birthDate: (minAge?: number, maxAge?: number) => birthDate(rng, minAge, maxAge),
     person: (gender?: Gender): Person => {
       const name = personName(rng, gender);

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  PROVINCES, ageOn, createThaiData, formatPhone, formatThaiDate, formatThaiDateLong, formatThaiId,
+  PROVINCES, POSTAL_CODES, isValidPostalCode, lookupPostalCode, ageOn, createThaiData, formatPhone, formatThaiDate, formatThaiDateLong, formatThaiId,
   isValidMobilePhone, isValidThaiId, LOCALITIES, thaiIdCheckDigit, toE164,
 } from "../src/index.js";
 
@@ -167,5 +167,34 @@ describe("full locality data", () => {
     for (const a of td.many(50, () => td.address({ bangkok: true }))) expect(a.moo).toBeUndefined();
     for (const a of td.many(50, () => td.address({ bangkok: false }))) expect(a.province).not.toBe("กรุงเทพมหานคร");
     expect(() => td.address({ province: "Atlantis" })).toThrow();
+  });
+});
+
+describe("postal codes", () => {
+  it("knows real codes and where they are", () => {
+    expect(POSTAL_CODES.length).toBeGreaterThan(800);
+    expect(isValidPostalCode("10200")).toBe(true);
+    expect(isValidPostalCode("10 200")).toBe(true);
+    expect(isValidPostalCode("99999")).toBe(false);
+    expect(lookupPostalCode("50200").every((l) => l.province === "เชียงใหม่")).toBe(true);
+    expect(lookupPostalCode("1020")).toEqual([]);
+  });
+
+  it("generates real codes, optionally by province", () => {
+    for (const c of td.many(100, () => td.postalCode())) expect(isValidPostalCode(c)).toBe(true);
+    for (const c of td.many(50, () => td.postalCode({ province: "ภูเก็ต" }))) {
+      expect(lookupPostalCode(c).some((l) => l.province === "ภูเก็ต")).toBe(true);
+    }
+  });
+
+  it("breaks codes in each requested way", () => {
+    for (let i = 0; i < 100; i++) {
+      expect(td.invalidPostalCode("unknown")).toMatch(/^\d{5}$/);
+      expect(td.invalidPostalCode("short")).toMatch(/^\d{4}$/);
+      expect(td.invalidPostalCode("long")).toMatch(/^\d{6}$/);
+      for (const kind of ["unknown", "short", "long", "letters"] as const) {
+        expect(isValidPostalCode(td.invalidPostalCode(kind))).toBe(false);
+      }
+    }
   });
 });

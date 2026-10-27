@@ -54,7 +54,8 @@ export interface Address extends Locality {
 }
 
 const pools = new Map<string, readonly Locality[]>();
-function poolFor(options: AddressOptions): readonly Locality[] {
+/** Localities matching the options; throws when none match. */
+export function poolFor(options: AddressOptions): readonly Locality[] {
   const key = `${options.province ?? ""}|${options.bangkok ?? ""}`;
   let pool = pools.get(key);
   if (!pool) {

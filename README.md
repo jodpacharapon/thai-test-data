@@ -32,6 +32,8 @@ check digits, mobile numbers, Thai/English names, consistent addresses, and Budd
 | เบอร์มือถือ (invalid) | `td.invalidPhone("prefix" \| "short" \| "long" \| "letters")` |
 | ชื่อ-นามสกุล ไทย/อังกฤษ | `td.name("male" \| "female")` |
 | ที่อยู่ ครบ 77 จังหวัด 7,436 ตำบล (จังหวัด/อำเภอ/ตำบล/รหัสไปรษณีย์ตรงกัน) | `td.address()` หรือ `td.address({ province: "เชียงใหม่" })` |
+| รหัสไปรษณีย์ที่มีใช้จริง | `td.postalCode()` หรือ `td.postalCode({ province: "ภูเก็ต" })` |
+| รหัสไปรษณีย์ (invalid) | `td.invalidPostalCode("unknown" \| "short" \| "long" \| "letters")` |
 | วันเกิดตามช่วงอายุ | `td.birthDate(18, 65)` |
 | บุคคลครบชุด | `td.person()` |
 
@@ -87,6 +89,7 @@ test("ปฏิเสธเลขบัตรประชาชนที่ผ�
 ### ฟังก์ชันช่วยอื่นๆ
 
 `isValidThaiId`, `formatThaiId`, `isValidMobilePhone`, `formatPhone`, `toE164`,
+`isValidPostalCode`, `lookupPostalCode`, `POSTAL_CODES`, `PROVINCES`, `LOCALITIES`,
 `formatThaiDate`, `formatThaiDateLong`, `toBuddhistYear`, `toChristianYear`, `ageOn`
 
 ## พัฒนาในเครื่อง
