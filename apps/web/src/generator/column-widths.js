@@ -35,3 +35,25 @@ export function columnWidths(columns, measure, padding) {
     return Math.ceil(widest + padding);
   });
 }
+
+/**
+ * Shrink columns so they fit `available` px, taking width from the widest columns first, so
+ * short columns keep their full width and long ones (an address) wrap. No column goes below
+ * its minimum, so the result can still be wider than `available` when the minimums don't fit.
+ * @param {number[]} widths natural widths
+ * @param {number} available
+ * @param {number[]} mins smallest width for each column
+ * @returns {number[]}
+ */
+export function fitToWidth(widths, available, mins) {
+  const sum = (cap) => widths.reduce((s, w, k) => s + Math.max(mins[k], Math.min(w, cap)), 0);
+  if (sum(Infinity) <= available) return [...widths];
+  let lo = 0;
+  let hi = Math.max(...widths);
+  for (let i = 0; i < 40; i++) {
+    const mid = (lo + hi) / 2;
+    if (sum(mid) <= available) lo = mid;
+    else hi = mid;
+  }
+  return widths.map((w, k) => Math.floor(Math.max(mins[k], Math.min(w, lo))));
+}

@@ -1,12 +1,15 @@
 // The result sheet: filters (search, status, reason), page size + pager, export buttons,
 // and the virtualized rows: a list for single values, and for types with several fields a table
 // when it fits the width, or one card per row when it doesn't, so nothing needs sideways scrolling.
+// Full screen always uses the table, fitted to the screen; its columns can be moved and resized.
 import { $, el, fmt, copy, debounce, download, replaceKeepingFocus, segmented, toast } from "../core/dom.js";
 import { columnsOf, hasCase, isTable, statusText } from "./rows.js";
 import { filterRows, paginate } from "./filter.js";
 import { rowToJson, toCsv, toJson, toText } from "./export.js";
 import { createVirtualList } from "./virtual-list.js";
-import { columnWidths } from "./column-widths.js";
+import { columnWidths, fitToWidth } from "./column-widths.js";
+import { createColumnState } from "./column-state.js";
+import { enableColumnDrag } from "./column-drag.js";
 
 const PAGE_SIZES = [["50", "50"], ["100", "100"], ["1000", "1,000"], ["50000", "50,000"], ["all", "ทั้งหมด"]];
 const STATUS_LABEL = { all: "ทั้งหมด", valid: "Valid", invalid: "Invalid" };
@@ -14,6 +17,10 @@ const COPIED_MS = 1200;
 // Table cells: 14px padding each side + 1px border + a little slack for font rendering.
 const CELL_PADDING_PX = 34;
 const STATUS_CHIP_PX = 16;
+const STATUS_HEADER = "ผลที่ควรได้";
+// Narrowest a long column is fitted to before full screen falls back to cards.
+const WRAP_MIN_PX = 160;
+const HEAD_TIP = "ลากเพื่อย้ายคอลัมน์ · ลากขอบขวาเพื่อปรับความกว้าง · Alt + ← / → เพื่อย้ายด้วยคีย์บอร์ด";
 // Font size of table cells and card values (table in base.css, .rec-v in generator.css).
 const CELL_FONT_REM = 0.92;
 // Last table column, holding the copy-row button (matches .copy-row in generator.css).
@@ -42,6 +49,10 @@ export function createResults({ fileName }) {
   const thead = table.createTHead();
   const tbody = table.createTBody();
   let layout = "list"; // "list" | "table" | "cards"
+  const colState = createColumnState();
+  const shownCols = () => colState.order(columnsOf(rows));
+  // Column order for copy and export, so they match what's on screen.
+  const exportCols = () => (isTable(rows) ? shownCols() : undefined);
   const listView = createVirtualList({
     scroller,
     body: list,
@@ -101,7 +112,7 @@ export function createResults({ fileName }) {
     );
   }
 
-  function paintRows() {
+  function paintRows({ keepScroll = false } = {}) {
     const { page, pages, from, items } = paginate(view.indices, f.page, f.pageSize);
     f.page = page;
     $("resultEmpty").hidden = items.length > 0 || rows.length === 0;
@@ -110,28 +121,23 @@ export function createResults({ fileName }) {
     layout = layoutFor();
     list.classList.toggle("cards", layout === "cards");
     if (layout === "table") {
-      const cols = columnsOf(rows);
-      const head = el("tr");
-      ["#", ...headersOf(cols)].forEach((c) => head.append(el("th", { textContent: c })));
-      const copyHead = el("th");
-      copyHead.setAttribute("aria-label", "คัดลอกทั้งแถว");
-      head.append(copyHead);
-      thead.replaceChildren(head);
+      const cols = shownCols();
+      paintHead(cols);
       if (scroller.firstChild !== table) scroller.replaceChildren(table);
       applyColumnWidths();
       listView.detach();
-      tableView.set(items, (i) => tableRow(rows[i], i, cols));
+      tableView.set(items, (i) => tableRow(rows[i], i, cols), keepScroll);
     } else {
       if (scroller.firstChild !== list) scroller.replaceChildren(list);
       tableView.detach();
       if (layout === "cards") {
-        const cols = columnsOf(rows);
-        const headers = headersOf(cols);
-        listView.set(items, (i) => cardRow(rows[i], i, cols, headers));
+        const cols = shownCols();
+        listView.set(items, (i) => cardRow(rows[i], i, cols), keepScroll);
       } else {
-        listView.set(items, (i) => listRow(rows[i], i));
+        listView.set(items, (i) => listRow(rows[i], i), keepScroll);
       }
     }
+    $("resetCols").hidden = !isTable(rows) || !colState.isCustom(columnsOf(rows));
     $("pager").hidden = pages <= 1;
     $("pageInfo").textContent = `หน้า ${fmt(page + 1)} / ${fmt(pages)}`;
     $("pagePrev").disabled = page === 0;
@@ -148,14 +154,37 @@ export function createResults({ fileName }) {
     $("sheetFoot").textContent = parts.join(" · ");
   }
 
-  const headersOf = (cols) => [...cols, ...(hasCase(rows) ? ["ผลที่ควรได้"] : [])];
+  const headersOf = (cols) => [...cols, ...(hasCase(rows) ? [STATUS_HEADER] : [])];
 
-  // Table when every column fits at full width; otherwise cards, which wrap instead of scrolling sideways.
+  // Headers of data columns can be dragged (see column-drag.js); #, status and copy stay put.
+  function paintHead(cols) {
+    const head = el("tr", {}, el("th", { textContent: "#" }));
+    cols.forEach((c) => {
+      const th = el("th", { className: "col-head", tabIndex: 0, title: HEAD_TIP },
+        el("span", { className: "col-name", textContent: c }), el("span", { className: "col-resize", ariaHidden: "true" }));
+      th.dataset.c = c;
+      head.append(th);
+    });
+    if (hasCase(rows)) head.append(el("th", { textContent: STATUS_HEADER }));
+    const copyHead = el("th");
+    copyHead.setAttribute("aria-label", "คัดลอกทั้งแถว");
+    head.append(copyHead);
+    thead.replaceChildren(head);
+  }
+
+  // Width of the # column in px (the same sum as --num-w in CSS).
+  function numWidth() {
+    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    return Math.max(NUM_MIN_PX, fmt(rows.length).length * NUM_DIGIT_REM * rem + NUM_PADDING_PX);
+  }
+
+  // Table when every column fits at full width, or in full screen when it fits with long columns
+  // wrapped; otherwise cards, which wrap instead of scrolling sideways (e.g. full screen on a phone).
   function layoutFor() {
     if (!isTable(rows)) return "list";
-    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-    const numW = Math.max(NUM_MIN_PX, fmt(rows.length).length * NUM_DIGIT_REM * rem + NUM_PADDING_PX);
-    const tableW = numW + widthsFor().reduce((a, b) => a + b, 0) + COPY_COL_PX;
+    const sizes = scroller.closest(".sheet.focus") ? (widthsFor(), minWidths) : widthsFor();
+    let tableW = numWidth() + COPY_COL_PX;
+    for (const w of sizes.values()) tableW += w;
     return tableW <= scroller.clientWidth ? "table" : "cards";
   }
 
@@ -163,7 +192,8 @@ export function createResults({ fileName }) {
   // screen), so full values show and columns stay put while scrolling. Cards use them too, as the
   // starting width of each field.
   let sizedFor = null;
-  let widths = [];
+  let widths = new Map(); // header → natural width in px
+  let minWidths = new Map(); // header → narrowest it may be fitted to
   let measureCtx = null;
   function widthsFor() {
     if (sizedFor === rows) return widths;
@@ -182,22 +212,51 @@ export function createResults({ fileName }) {
     };
     const columns = cols.map((c, k) => ({ header: headers[k], texts: rows.map((r) => String(r.value[c])) }));
     if (hasCase(rows)) columns.push({ header: headers.at(-1), texts: rows.map(statusText), extra: STATUS_CHIP_PX });
-    widths = columnWidths(columns, measure, CELL_PADDING_PX).map((w, k) => w + (columns[k].extra ?? 0));
+    const natural = columnWidths(columns, measure, CELL_PADDING_PX).map((w, k) => w + (columns[k].extra ?? 0));
+    widths = new Map(columns.map((c, k) => [c.header, natural[k]]));
+    // Short values (IDs, phones, dates) and the status chip never wrap; long ones (names, emails,
+    // addresses) may wrap down to WRAP_MIN_PX.
+    minWidths = new Map(columns.map((c, k) => [c.header,
+      c.extra || natural[k] <= WRAP_MIN_PX ? natural[k] : Math.max(WRAP_MIN_PX, Math.ceil(measure(c.header) + CELL_PADDING_PX))]));
     return widths;
   }
 
+  // Columns someone resized keep that width; the rest share the space left, and long ones wrap
+  // (fitToWidth) so the table fits without sideways scrolling unless resized wider on purpose.
   function applyColumnWidths() {
-    const colgroup = el("colgroup", {}, el("col", { style: "width: var(--num-w)" }), ...widths.map((w) => el("col", { style: `width: ${w}px` })),
+    const all = columnsOf(rows);
+    const headers = headersOf(shownCols());
+    const natural = widthsFor();
+    const fixed = headers.map((h) => colState.widthOf(all, h));
+    const free = headers.filter((h, k) => fixed[k] === undefined);
+    const room = scroller.clientWidth - numWidth() - COPY_COL_PX - fixed.reduce((s, w) => s + (w ?? 0), 0);
+    const fitted = fitToWidth(free.map((h) => natural.get(h)), room, free.map((h) => minWidths.get(h)));
+    let next = 0;
+    const px = headers.map((h, k) => fixed[k] ?? fitted[next++]);
+    table.classList.toggle("wrap", headers.some((h, k) => px[k] < natural.get(h)));
+    const colgroup = el("colgroup", {}, el("col", { style: "width: var(--num-w)" }), ...px.map((w) => el("col", { style: `width: ${w}px` })),
       el("col", { style: `width: ${COPY_COL_PX}px` }));
     table.querySelector("colgroup")?.remove();
     table.prepend(colgroup);
-    table.style.width = `calc(var(--num-w) + ${widths.reduce((a, b) => a + b, 0) + COPY_COL_PX}px)`;
+    table.style.width = `calc(var(--num-w) + ${px.reduce((a, b) => a + b, 0) + COPY_COL_PX}px)`;
   }
+
+  enableColumnDrag(thead, {
+    onMove: (col, to) => { colState.move(columnsOf(rows), col, to); paintRows({ keepScroll: true }); },
+    onResize: (col, px) => { colState.setWidth(columnsOf(rows), col, px); applyColumnWidths(); },
+    onResizeEnd: () => { tableView.refresh(); $("resetCols").hidden = false; },
+  });
+  $("resetCols").addEventListener("click", () => { colState.reset(columnsOf(rows)); paintRows({ keepScroll: true }); });
 
   // Widths measured before the web fonts arrive would be for the fallback font; measure again once they load.
   document.fonts?.ready.then(() => { if (isTable(rows)) { sizedFor = null; paintRows(); } });
-  // Switch between table and cards when the width changes (rotating a phone, resizing the window).
-  new ResizeObserver(() => { if (isTable(rows) && layoutFor() !== layout) paintRows(); }).observe(scroller);
+  // Switch between table and cards when the width changes (rotating a phone, resizing the window,
+  // full screen), or fit the table's columns to the new width.
+  new ResizeObserver(() => {
+    if (!isTable(rows)) return;
+    if (layoutFor() !== layout) paintRows({ keepScroll: true });
+    else if (layout === "table") { applyColumnWidths(); tableView.refresh(); }
+  }).observe(scroller);
 
   // Row builders. data-i is the index into `rows`, read by the delegated click handler.
   function listRow(r, i) {
@@ -232,22 +291,22 @@ export function createResults({ fileName }) {
 
   // One card per row: each field is a label over its value. Fields start at their column's width and
   // wrap onto the next line when the card is full, so a long address gets a line of its own.
-  function cardRow(r, i, cols, headers) {
+  function cardRow(r, i, cols) {
     const li = el("li", { className: "record" });
     li.dataset.i = i;
     const fields = el("div", { className: "rec-fields" });
-    cols.forEach((c, k) => {
+    cols.forEach((c) => {
       const v = String(r.value[c]);
       const field = el("div", { className: "rec-field", tabIndex: 0, title: "คลิกเพื่อคัดลอก" },
-        el("span", { className: "rec-k", textContent: headers[k] }),
+        el("span", { className: "rec-k", textContent: c }),
         el("span", { className: MONO_CELL.test(v) ? "rec-v mono" : "rec-v", textContent: v }));
       field.dataset.c = c;
-      field.style.setProperty("--w", `${widths[k]}px`);
+      field.style.setProperty("--w", `${widths.get(c)}px`);
       fields.append(field);
     });
     if (hasCase(rows)) {
       fields.append(el("div", { className: "rec-field" },
-        el("span", { className: "rec-k", textContent: headers.at(-1) }),
+        el("span", { className: "rec-k", textContent: STATUS_HEADER }),
         el("span", { className: "st " + (r.ok ? "ok" : "bad"), textContent: statusText(r) })));
     }
     li.append(el("span", { className: "num", textContent: fmt(i + 1) }), fields, copyRowButton());
@@ -263,7 +322,7 @@ export function createResults({ fileName }) {
   // The copy-row button copies every field of its row as one JSON object.
   async function copyWholeRow(button) {
     const r = rows[Number(button.closest("[data-i]")?.dataset.i)];
-    if (!r || !(await copy(rowToJson(r), "คัดลอกทั้งแถวแล้ว (JSON)"))) return;
+    if (!r || !(await copy(rowToJson(r, exportCols()), "คัดลอกทั้งแถวแล้ว (JSON)"))) return;
     button.classList.add("copied");
     setTimeout(() => button.classList.remove("copied"), COPIED_MS);
   }
@@ -329,9 +388,9 @@ export function createResults({ fileName }) {
     if (m.length === 0) toast("ไม่มีแถวที่ตรงตัวกรองให้ส่งออก");
     else fn(m);
   };
-  $("copyAll").addEventListener("click", withMatched((m) => copy(toText(m), `คัดลอก ${fmt(m.length)} แถวแล้ว`)));
-  $("copyJson").addEventListener("click", withMatched((m) => copy(toJson(m), "คัดลอก JSON แล้ว")));
-  $("dlCsv").addEventListener("click", withMatched((m) => download(fileName(), toCsv(m))));
+  $("copyAll").addEventListener("click", withMatched((m) => copy(toText(m, exportCols()), `คัดลอก ${fmt(m.length)} แถวแล้ว`)));
+  $("copyJson").addEventListener("click", withMatched((m) => copy(toJson(m, exportCols()), "คัดลอก JSON แล้ว")));
+  $("dlCsv").addEventListener("click", withMatched((m) => download(fileName(), toCsv(m, exportCols()))));
 
   return {
     /** Show a new set of rows, keeping the current filters. */

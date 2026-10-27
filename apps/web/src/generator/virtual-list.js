@@ -139,13 +139,21 @@ export function createVirtualList({ scroller, body, makeSpacer }) {
   }).observe(scroller);
 
   return {
-    /** Replace the rows and make this list the one painting into the scroller. `render(item, position)` builds one row. */
-    set(nextItems, render) {
+    /**
+     * Replace the rows and make this list the one painting into the scroller. `render(item, position)`
+     * builds one row. With `keepScroll` (same rows, new arrangement) the scroll position stays.
+     */
+    set(nextItems, render, keepScroll = false) {
       items = nextItems;
       makeRow = render;
       active = true;
       estimate = 0;
-      scroller.scrollTop = 0;
+      if (!keepScroll) scroller.scrollTop = 0;
+      paint();
+    },
+    /** Measure every row again, e.g. after column widths changed and text wraps differently. */
+    refresh() {
+      estimate = 0;
       paint();
     },
     /** Stop painting (another list now owns the scroller) and release the rows. */

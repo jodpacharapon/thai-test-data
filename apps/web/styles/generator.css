@@ -109,6 +109,18 @@
 .result-scroll td { overflow: hidden; text-overflow: ellipsis; }
 .result-scroll th:first-child, .result-scroll td:first-child { position: sticky; left: 0; z-index: 1; padding-right: 12px; }
 .result-scroll thead th:first-child { z-index: 2; }
+/* Movable, resizable data columns (column-drag.js). Narrowed columns wrap instead of cutting values off. */
+.result-scroll th.col-head { cursor: grab; user-select: none; touch-action: none; overflow: hidden; text-overflow: ellipsis; }
+.result-scroll th.col-head:hover { color: var(--ink); }
+.result-scroll th.dragging { opacity: 0.45; cursor: grabbing; }
+.result-scroll th.drop-before { box-shadow: inset 3px 0 0 var(--navy); }
+.result-scroll th.drop-after { box-shadow: inset -3px 0 0 var(--navy); }
+.col-resize { position: absolute; top: 0; right: 0; bottom: 0; width: 9px; cursor: col-resize; }
+.col-resize::after { content: ""; position: absolute; top: 25%; bottom: 25%; right: 3px; width: 2px; border-radius: 1px; background: var(--rule-strong);
+  opacity: 0; transition: opacity var(--fast); }
+.col-head:hover .col-resize::after, thead.resizing .col-resize::after { opacity: 1; }
+thead.resizing, thead.resizing * { cursor: col-resize !important; }
+.result-scroll table.wrap td, .result-scroll table.wrap th.col-head { white-space: normal; overflow-wrap: anywhere; }
 .result-scroll td[data-c] { cursor: pointer; transition: background var(--fast); }
 .result-scroll td[data-c]:hover { background: var(--well); }
 .result-scroll td.copied { background: var(--green-tint); }
