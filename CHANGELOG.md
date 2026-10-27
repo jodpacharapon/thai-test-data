@@ -5,6 +5,18 @@ Format อ้างอิง [Keep a Changelog](https://keepachangelog.com/en/1.
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-10-27
+
+Library เหมือน 0.3.0 ทุกอย่าง รอบนี้แก้เฉพาะ web app
+
+### Added
+
+- Web app: ยืนยันเจ้าของเว็บกับ Google Search Console แล้ว (ไฟล์ยืนยันและ meta tag) และส่ง `sitemap.xml` แล้ว Google เจอครบ 4 หน้า
+
+### Fixed
+
+- Web app: เลิกใช้ `cleanUrls` ของ Vercel ซึ่ง redirect ทุก URL ที่ลงท้ายด้วย `.html` ไฟล์อย่างไฟล์ยืนยันของ Google จึงเปิดได้ตรงๆ ตอนนี้ map `/validator`, `/docs` และ `/report` ไปที่ไฟล์ HTML ของแต่ละหน้าด้วย rewrites แทน พร้อม test ที่เช็คว่า rewrites ตรงกับรายชื่อหน้าใน `pages.js`
+
 ## [0.3.0] - 2026-10-27
 
 Library เพิ่ม `td.unique()` ส่วน API เดิมใช้ได้เหมือนเดิมทุกอย่าง ที่เปลี่ยนเยอะคือ web app
@@ -78,7 +90,8 @@ First release
 - Validator เลขบัตรพร้อมแสดงวิธีคำนวณ check digit และ validator รหัสไปรษณีย์
 - หน้า Docs, light/dark mode, responsive บนมือถือ
 
-[Unreleased]: https://github.com/jodpacharapon/thai-test-data/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/jodpacharapon/thai-test-data/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/jodpacharapon/thai-test-data/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/jodpacharapon/thai-test-data/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/jodpacharapon/thai-test-data/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/jodpacharapon/thai-test-data/releases/tag/v0.1.0
