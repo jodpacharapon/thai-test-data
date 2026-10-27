@@ -24,6 +24,7 @@ test("the build writes each page with its own title and canonical URL, plus the 
     const html = dist(page.path === "/" ? "index.html" : `${page.path.slice(1)}.html`);
     assert.ok(html.includes(`<link rel="canonical" href="https://thai-test-data.vercel.app${page.path}">`));
     assert.ok(html.includes("<title>"));
+    assert.ok(html.includes('<meta name="google-site-verification" content="BduaTRqeVVY_KIrguWzr5KXrvoh4l0HdAnSZ4JnhrIs">'));
     assert.ok(dist("sitemap.xml").includes(`<loc>https://thai-test-data.vercel.app${page.path}</loc>`));
   }
   assert.equal(dist("googlec976bffbd73b538c.html"), "google-site-verification: googlec976bffbd73b538c.html");
