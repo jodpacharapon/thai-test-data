@@ -66,7 +66,7 @@
         </div>
         <div class="run">
           <div class="run-field">
-            <label for="count">Count <button class="info" type="button" aria-label="Count คืออะไร" data-tip="จำนวนรายการที่จะ generate (สูงสุด 100,000) ตารางผลลัพธ์เลื่อนดูได้ครบทุกแถว Copy all, JSON และ CSV ได้ครบเช่นกัน">i</button></label>
+            <label for="count">Count <button class="info" type="button" aria-label="Count คืออะไร" data-tip="จำนวนรายการที่จะสุ่ม (สูงสุด 100,000) เลื่อนดูในตารางได้ครบทุกแถว และคัดลอกหรือส่งออกเป็น JSON, CSV ได้ครบเช่นกัน">i</button></label>
             <input id="count" type="number" inputmode="numeric" min="1" max="100000" value="100">
             <div class="presets" aria-label="จำนวนที่ใช้บ่อย">
               <button type="button" data-count="10">10</button><button type="button" data-count="100">100</button><button type="button" data-count="1000">1K</button><button type="button" data-count="10000">10K</button><button type="button" data-count="100000">100K</button>
@@ -91,8 +91,12 @@
           </div>
           <div id="statusFilter" hidden></div>
           <select class="reason" id="reasonFilter" aria-label="กรองตามสาเหตุที่ invalid" hidden></select>
+          <button class="btn clear" id="clearFilters" type="button" hidden>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            ล้างตัวกรอง
+          </button>
           <span class="spacer"></span>
-          <button class="btn" id="copyAll" type="button">Copy all</button>
+          <button class="btn" id="copyAll" type="button">คัดลอกทั้งหมด</button>
           <button class="btn" id="copyJson" type="button">JSON</button>
           <button class="btn" id="dlCsv" type="button">CSV</button>
           <small class="filter-error" id="rqError" aria-live="polite"></small>
@@ -117,14 +121,14 @@
   <!-- Validate -->
   <section class="view wrap" id="view-validate" hidden>
     <h1 class="page-title">Validator</h1>
-    <p class="page-lead">ตรวจทีละหลายค่าแบบ regex tester วางค่าบรรทัดละ 1 ค่า ทุกบรรทัดจะถูก highlight พร้อมบอกเหตุผล คลิกบรรทัดเพื่อดูวิธีคำนวณ</p>
+    <p class="page-lead">ตรวจได้ทีละหลายค่า คล้ายเว็บทดสอบ regex วางค่าบรรทัดละ 1 ค่า ทุกบรรทัดจะมีสีบอกว่าผ่านหรือไม่ผ่านพร้อมเหตุผล คลิกบรรทัดเพื่อดูวิธีคำนวณ</p>
 
     <div class="vx">
       <div class="vx-rules" id="vxRules"></div>
 
       <div class="card vx-pattern">
         <div class="vx-pattern-top">
-          <span class="vx-label">Pattern</span>
+          <span class="vx-label">รูปแบบ</span>
           <span class="vx-hint" id="vxHint"></span>
         </div>
         <div class="pattern-bar" id="vxPatternBar">
@@ -136,7 +140,7 @@
         <div class="vx-pattern-foot">
           <div class="chips" id="vxChecks"></div>
           <label class="check" id="vxFullWrap" hidden><input type="checkbox" id="vxFull">ต้องตรงทั้งบรรทัด (^…$)</label>
-          <button class="btn small" id="vxEditPattern" type="button">แก้ pattern นี้เอง</button>
+          <button class="btn small" id="vxEditPattern" type="button">แก้รูปแบบนี้เอง</button>
           <small class="filter-error" id="vxPatternError" aria-live="polite"></small>
         </div>
       </div>
@@ -144,7 +148,7 @@
       <div class="vx-grid">
         <div class="card vx-input">
           <div class="vx-head">
-            <span class="vx-label">Test values <small>บรรทัดละ 1 ค่า</small></span>
+            <span class="vx-label">ค่าที่จะตรวจ <small>บรรทัดละ 1 ค่า</small></span>
             <span class="spacer"></span>
             <button class="btn small" id="vxSample" type="button">สุ่มตัวอย่าง</button>
             <button class="btn small" id="vxClear" type="button">ล้าง</button>
@@ -164,8 +168,8 @@
           <div class="vx-head">
             <div id="vxFilter"></div>
             <span class="spacer"></span>
-            <button class="btn small" id="vxCopyOk" type="button">Copy ที่ผ่าน</button>
-            <button class="btn small" id="vxCopyBad" type="button">Copy ที่ไม่ผ่าน</button>
+            <button class="btn small" id="vxCopyOk" type="button">คัดลอกที่ผ่าน</button>
+            <button class="btn small" id="vxCopyBad" type="button">คัดลอกที่ไม่ผ่าน</button>
           </div>
           <ol class="vx-list" id="vxList"></ol>
           <p class="result-empty" id="vxEmpty" hidden></p>

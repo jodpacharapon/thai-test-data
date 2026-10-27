@@ -5,10 +5,16 @@ import { columnsOf, hasCase, isTable, statusText } from "./rows.js";
 import { filterRows, paginate } from "./filter.js";
 import { toCsv, toJson, toText } from "./export.js";
 import { createVirtualList } from "./virtual-list.js";
+import { columnWidths } from "./column-widths.js";
 
 const PAGE_SIZES = [["50", "50"], ["100", "100"], ["1000", "1,000"], ["50000", "50,000"], ["all", "ทั้งหมด"]];
 const STATUS_LABEL = { all: "ทั้งหมด", valid: "Valid", invalid: "Invalid" };
 const COPIED_MS = 1200;
+// Table cells: 14px padding each side + 1px border + a little slack for font rendering.
+const CELL_PADDING_PX = 34;
+const STATUS_CHIP_PX = 16;
+const MONO_CELL = /^[\d+\-/]+$/;
+const DEFAULT_FILTERS = Object.freeze({ query: "", isRegex: false, status: "all", reason: "all", pageSize: 100, page: 0 });
 
 const spacerHeight = (node) => (h) => { node.style.height = `${h}px`; };
 
@@ -16,7 +22,7 @@ const spacerHeight = (node) => (h) => { node.style.height = `${h}px`; };
 export function createResults({ fileName }) {
   let rows = [];
   let view = { indices: [], counts: { all: 0, valid: 0, invalid: 0 }, reasons: [] };
-  const f = { query: "", isRegex: false, status: "all", reason: "all", pageSize: 100, page: 0 };
+  const f = { ...DEFAULT_FILTERS };
 
   // Two bodies, one per layout; only the one in use is attached to the scroller.
   const scroller = $("resultScroll");
@@ -54,6 +60,8 @@ export function createResults({ fileName }) {
       view = filterRows(rows, f);
     }
     f.page = 0;
+    // The clear button appears once anything differs from the defaults, including page size.
+    $("clearFilters").hidden = !isFiltered() && !f.isRegex && f.pageSize === DEFAULT_FILTERS.pageSize;
     $("rqError").textContent = view.error ? `regex ผิด: ${view.error}` : "";
     $("rq").classList.toggle("bad", Boolean(view.error));
     paintStatus();
@@ -85,12 +93,16 @@ export function createResults({ fileName }) {
     const { page, pages, from, items } = paginate(view.indices, f.page, f.pageSize);
     f.page = page;
     $("resultEmpty").hidden = items.length > 0 || rows.length === 0;
+    // Size the # column for the longest row number (e.g. "100,000"), so every row lines up and nothing is clipped.
+    scroller.style.setProperty("--num-chars", String(fmt(rows.length).length));
     if (isTable(rows)) {
       const cols = columnsOf(rows);
+      const headers = [...cols, ...(hasCase(rows) ? ["ผลที่ควรได้"] : [])];
       const head = el("tr");
-      ["#", ...cols, ...(hasCase(rows) ? ["Expected"] : [])].forEach((c) => head.append(el("th", { textContent: c })));
+      ["#", ...headers].forEach((c) => head.append(el("th", { textContent: c })));
       thead.replaceChildren(head);
       if (scroller.firstChild !== table) scroller.replaceChildren(table);
+      sizeColumns(cols, headers);
       listView.detach();
       tableView.set(items, (i) => tableRow(rows[i], i, cols));
     } else {
@@ -107,12 +119,38 @@ export function createResults({ fileName }) {
 
   function paintFoot(from, shown) {
     const n = view.indices.length;
-    const parts = [isFiltered() ? `ตรงตัวกรอง ${fmt(n)} จาก ${fmt(rows.length)} rows` : `${fmt(rows.length)} rows`];
+    const parts = [isFiltered() ? `ตรงตัวกรอง ${fmt(n)} จาก ${fmt(rows.length)} แถว` : `${fmt(rows.length)} แถว`];
     if (shown && shown < n) parts.push(`แสดงแถว ${fmt(from + 1)}–${fmt(from + shown)}`);
-    if (isFiltered()) parts.push("Copy all / JSON / CSV จะ export เฉพาะแถวที่ตรงตัวกรอง");
-    else parts.push(isTable(rows) ? "ใช้ปุ่ม JSON หรือ CSV เพื่อ export ทั้งตาราง" : "คลิกแถวเพื่อ copy");
+    if (isFiltered()) parts.push("คัดลอกทั้งหมด, JSON และ CSV จะได้เฉพาะแถวที่ตรงตัวกรอง");
+    else parts.push(isTable(rows) ? "ใช้ปุ่ม JSON หรือ CSV เพื่อส่งออกทั้งตาราง" : "คลิกแถวเพื่อคัดลอก");
     $("sheetFoot").textContent = parts.join(" · ");
   }
+
+  // Fixed column widths from the longest value in each column (over all rows, not just the
+  // ones on screen), so full values show and columns stay put while scrolling.
+  let sizedFor = null;
+  let measureCtx = null;
+  function sizeColumns(cols, headers) {
+    if (sizedFor === rows) return;
+    sizedFor = rows;
+    measureCtx ??= document.createElement("canvas").getContext("2d");
+    const cell = getComputedStyle(tbody);
+    const mono = getComputedStyle(document.documentElement).getPropertyValue("--font-mono");
+    const measure = (text) => {
+      measureCtx.font = `${cell.fontSize} ${MONO_CELL.test(text) ? mono : cell.fontFamily}`;
+      return measureCtx.measureText(text).width;
+    };
+    const columns = cols.map((c, k) => ({ header: headers[k], texts: rows.map((r) => String(r.value[c])) }));
+    if (hasCase(rows)) columns.push({ header: headers.at(-1), texts: rows.map(statusText), extra: STATUS_CHIP_PX });
+    const widths = columnWidths(columns, measure, CELL_PADDING_PX).map((w, k) => w + (columns[k].extra ?? 0));
+    const colgroup = el("colgroup", {}, el("col", { style: "width: var(--num-w)" }), ...widths.map((w) => el("col", { style: `width: ${w}px` })));
+    table.querySelector("colgroup")?.remove();
+    table.prepend(colgroup);
+    table.style.width = `calc(var(--num-w) + ${widths.reduce((a, b) => a + b, 0)}px)`;
+  }
+
+  // Widths measured before the web fonts arrive would be for the fallback font; measure again once they load.
+  document.fonts?.ready.then(() => { if (isTable(rows)) { sizedFor = null; paintRows(); } });
 
   // Row builders. data-i is the index into `rows`, read by the delegated click handler.
   function listRow(r, i) {
@@ -127,7 +165,7 @@ export function createResults({ fileName }) {
       st.textContent = statusText(r);
       if (r.ok && r.note) st.title = r.note;
     }
-    li.append(el("span", { className: "num", textContent: fmt(i + 1) }), val, st, el("span", { className: "hint", textContent: "Copy" }));
+    li.append(el("span", { className: "num", textContent: fmt(i + 1) }), val, st, el("span", { className: "hint", textContent: "คัดลอก" }));
     return li;
   }
 
@@ -135,7 +173,7 @@ export function createResults({ fileName }) {
     const tr = el("tr", {}, el("td", { textContent: fmt(i + 1) }));
     cols.forEach((c) => {
       const td = el("td", { textContent: r.value[c], title: r.value[c] });
-      if (/^[\d+\-/]+$/.test(String(r.value[c]))) td.className = "mono";
+      if (MONO_CELL.test(String(r.value[c]))) td.className = "mono";
       tr.append(td);
     });
     if (hasCase(rows)) tr.append(el("td", {}, el("span", { className: "st " + (r.ok ? "ok" : "bad"), textContent: statusText(r) })));
@@ -144,11 +182,11 @@ export function createResults({ fileName }) {
 
   async function copyRow(li) {
     const r = rows[Number(li.dataset.i)];
-    if (!r || !(await copy(r.value, "Copied"))) return;
+    if (!r || !(await copy(r.value, "คัดลอกแล้ว"))) return;
     const hint = li.querySelector(".hint");
     li.classList.add("copied");
     hint.textContent = "✓";
-    setTimeout(() => { li.classList.remove("copied"); hint.textContent = "Copy"; }, COPIED_MS);
+    setTimeout(() => { li.classList.remove("copied"); hint.textContent = "คัดลอก"; }, COPIED_MS);
   }
   list.addEventListener("click", (e) => { const li = e.target.closest(".row"); if (li) copyRow(li); });
   list.addEventListener("keydown", (e) => {
@@ -157,13 +195,13 @@ export function createResults({ fileName }) {
   });
 
   // Filter controls.
+  const setRegex = (on) => {
+    f.isRegex = on;
+    $("rqRegex").setAttribute("aria-pressed", String(on));
+    $("rq").placeholder = on ? "regex เช่น ^1\\d{12}$" : "ค้นหาในผลลัพธ์";
+  };
   $("rq").addEventListener("input", debounce((e) => { f.query = e.target.value; apply(); }));
-  $("rqRegex").addEventListener("click", (e) => {
-    f.isRegex = !f.isRegex;
-    e.currentTarget.setAttribute("aria-pressed", String(f.isRegex));
-    $("rq").placeholder = f.isRegex ? "regex เช่น ^1\\d{12}$" : "ค้นหาในผลลัพธ์";
-    apply();
-  });
+  $("rqRegex").addEventListener("click", () => { setRegex(!f.isRegex); apply(); });
   $("reasonFilter").addEventListener("change", (e) => { f.reason = e.target.value; apply(); });
   const pageSize = segmented("pageSize", PAGE_SIZES, String(f.pageSize), (val) => {
     f.pageSize = val === "all" ? Infinity : Number(val);
@@ -171,17 +209,25 @@ export function createResults({ fileName }) {
   }, { ariaLabel: "จำนวนแถวต่อหน้า" });
   pageSize.id = "pageSize";
   $("pageSize").replaceWith(pageSize);
+  $("clearFilters").addEventListener("click", () => {
+    Object.assign(f, { ...DEFAULT_FILTERS });
+    $("rq").value = "";
+    setRegex(false);
+    $(`pageSize-${DEFAULT_FILTERS.pageSize}`).checked = true;
+    apply();
+    $("rq").focus();
+  });
   $("pagePrev").addEventListener("click", () => { f.page--; paintRows(); });
   $("pageNext").addEventListener("click", () => { f.page++; paintRows(); });
 
   // Exports follow the filters. With nothing matched, say so instead of copying an empty string over the clipboard.
   const withMatched = (fn) => () => {
     const m = matched();
-    if (m.length === 0) toast("ไม่มีแถวที่ตรงตัวกรองให้ export");
+    if (m.length === 0) toast("ไม่มีแถวที่ตรงตัวกรองให้ส่งออก");
     else fn(m);
   };
-  $("copyAll").addEventListener("click", withMatched((m) => copy(toText(m), `Copied ${fmt(m.length)} rows`)));
-  $("copyJson").addEventListener("click", withMatched((m) => copy(toJson(m), "Copied JSON")));
+  $("copyAll").addEventListener("click", withMatched((m) => copy(toText(m), `คัดลอก ${fmt(m.length)} แถวแล้ว`)));
+  $("copyJson").addEventListener("click", withMatched((m) => copy(toJson(m), "คัดลอก JSON แล้ว")));
   $("dlCsv").addEventListener("click", withMatched((m) => download(fileName(), toCsv(m))));
 
   return {

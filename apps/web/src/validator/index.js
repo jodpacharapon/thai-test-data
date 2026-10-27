@@ -8,7 +8,7 @@ const MAX_LINES = 5000;
 // Above this many lines, wait for a pause in typing before re-checking everything.
 const LIVE_LINES = 400;
 const CUSTOM = "custom";
-const TABS = [...RULES.map((r) => [r.key, r.title]), [CUSTOM, "Custom regex"]];
+const TABS = [...RULES.map((r) => [r.key, r.title]), [CUSTOM, "Regex กำหนดเอง"]];
 const FILTERS = { all: "ทั้งหมด", ok: "ผ่าน", bad: "ไม่ผ่าน" };
 
 const state = {
@@ -195,10 +195,10 @@ export function initValidator() {
   $("vxClear").addEventListener("click", () => { input.value = ""; state.texts.set(state.ruleKey, ""); input.focus(); run(); });
   const copyWhere = (ok, label) => () => {
     const values = state.entries.filter((e) => e.result && e.result.ok === ok).map((e) => e.line.trim());
-    copy(values.join("\n"), `Copied ${fmt(values.length)} ${label}`);
+    copy(values.join("\n"), `คัดลอก${label} ${fmt(values.length)} ค่าแล้ว`);
   };
-  $("vxCopyOk").addEventListener("click", copyWhere(true, "ค่าที่ผ่าน"));
-  $("vxCopyBad").addEventListener("click", copyWhere(false, "ค่าที่ไม่ผ่าน"));
+  $("vxCopyOk").addEventListener("click", copyWhere(true, "ที่ผ่าน"));
+  $("vxCopyBad").addEventListener("click", copyWhere(false, "ที่ไม่ผ่าน"));
 
   $("vxFull").checked = state.custom.fullMatch;
   state.texts.set(state.ruleKey, sampleText(currentRule()));

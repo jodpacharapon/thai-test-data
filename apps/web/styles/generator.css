@@ -63,6 +63,8 @@
 .regex-toggle[aria-pressed="true"] { background: var(--navy); color: var(--navy-ink); }
 .reason { height: 34px; max-width: 240px; padding: 0 8px; border: 1px solid var(--rule-strong); border-radius: 6px; background: var(--panel); font-size: 0.88rem; }
 .filters .seg label { padding: 5px 10px; font-size: 0.85rem; }
+.btn.clear { display: inline-flex; align-items: center; gap: 6px; border-style: dashed; color: var(--sub); }
+.btn.clear:hover { color: var(--red); border-color: var(--red); background: var(--red-tint); }
 .filters .filter-error { flex-basis: 100%; }
 
 /* Page size + pager */
@@ -72,12 +74,13 @@
 .pager .btn { height: 30px; width: 30px; }
 
 /* Virtualized rows: a fixed-height scroller; only the rows in view are in the DOM. */
-.result-scroll { max-height: min(68vh, 760px); overflow: auto; overscroll-behavior: contain; position: relative; }
+/* --num-chars is set from the row count; a mono digit at 0.78rem is about 0.47rem wide, plus 12px padding each side. */
+.result-scroll { --num-w: max(44px, calc(var(--num-chars, 3) * 0.47rem + 26px)); max-height: min(68vh, 760px); overflow: auto; overscroll-behavior: contain; position: relative; }
 .result-scroll thead th { position: sticky; top: 0; z-index: 1; }
 .spacer td, li.spacer { padding: 0 !important; border: 0 !important; background: none !important; list-style: none; }
 
 .rows { list-style: none; margin: 0; padding: 0; }
-.row { display: grid; grid-template-columns: 60px minmax(0, 1fr) auto auto; align-items: center; min-height: 44px; border-bottom: 1px solid var(--rule); cursor: pointer;
+.row { display: grid; grid-template-columns: var(--num-w) minmax(0, 1fr) auto auto; align-items: center; min-height: 44px; border-bottom: 1px solid var(--rule); cursor: pointer;
   transition: background var(--fast); }
 .row .num { align-self: stretch; display: flex; align-items: center; justify-content: flex-end; padding-right: 12px; border-right: 1px solid var(--rule); background: var(--well);
   font: 0.78rem var(--font-mono); color: var(--sub); font-variant-numeric: tabular-nums; }
@@ -89,7 +92,12 @@
 .row:hover .hint, .row:focus-visible .hint { opacity: 1; }
 .row.copied { background: var(--green-tint); }
 .row.copied .hint { opacity: 1; color: var(--green); }
-.result-scroll td { max-width: 360px; overflow: hidden; text-overflow: ellipsis; }
+/* Table: column widths come from the longest values (see column-widths.js); wide tables scroll sideways
+   with the # column pinned on the left. */
+.result-scroll table { table-layout: fixed; min-width: 100%; }
+.result-scroll td { overflow: hidden; text-overflow: ellipsis; }
+.result-scroll th:first-child, .result-scroll td:first-child { position: sticky; left: 0; z-index: 1; padding-right: 12px; }
+.result-scroll thead th:first-child { z-index: 2; }
 
 @media (max-width: 820px) {
   .workspace { grid-template-columns: 1fr; }
@@ -103,7 +111,7 @@
   .run-check { padding-top: 0; flex: 0 0 auto; }
   .run .btn.main { flex: 1 1 100%; margin-top: 0; }
   .search { flex: 1 1 100%; }
-  .row { grid-template-columns: 44px minmax(0, 1fr); }
+  .row { grid-template-columns: var(--num-w) minmax(0, 1fr); }
   .row .st { grid-column: 2; justify-self: start; margin: 0 0 8px 14px; }
   .row .hint { display: none; }
   .result-scroll { max-height: 70vh; }

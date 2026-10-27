@@ -143,17 +143,17 @@ export function customRule(source, flags, { fullMatch }) {
   const { re, error } = typed.error || !fullMatch ? typed : compileRegex(`^(?:${source})$`, flags);
   return {
     key: "custom",
-    title: "Custom regex",
-    hint: "เขียน regex เอง แต่ละบรรทัดผ่านเมื่อ match",
+    title: "Regex กำหนดเอง",
+    hint: "แต่ละบรรทัดผ่านเมื่อ regex ตรงกับข้อความ",
     pattern: { source, note: fullMatch ? "ต้องตรงทั้งบรรทัด" : "" },
     checks: [],
     error,
     test(line) {
       if (!re || !source) return { ok: false, reason: error ? "pattern ผิด" : "ยังไม่ได้ใส่ pattern", spans: [] };
       const matches = findMatches(re, line);
-      if (!matches.length) return { ok: false, reason: "ไม่ match", spans: [] };
+      if (!matches.length) return { ok: false, reason: "ไม่ตรง", spans: [] };
       // Zero-length matches (lookaheads, \b, \d*) still count; they just have nothing to highlight.
-      const reason = matches.length > 1 ? `${matches.length} matches` : matches[0].text ? `match "${matches[0].text}"` : `match ว่างที่ตำแหน่ง ${matches[0].start}`;
+      const reason = matches.length > 1 ? `ตรง ${matches.length} จุด` : matches[0].text ? `ตรงกับ "${matches[0].text}"` : `ตรงแบบไม่มีตัวอักษร ที่ตำแหน่ง ${matches[0].start}`;
       const spans = matches.filter((m) => m.end > m.start).map((m) => [m.start, m.end]);
       return { ok: true, reason, spans, data: { matches } };
     },

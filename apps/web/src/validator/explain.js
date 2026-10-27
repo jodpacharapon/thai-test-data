@@ -21,9 +21,9 @@ function checkDigitWorking(d) {
   const grid = el("div", { className: "calc-grid" });
   const cell = (text, cls = "") => grid.append(el("div", { className: cls, textContent: text }));
   const rows = [
-    ["digit", (i) => (i < 12 ? d[i] : d[12] ?? "?")],
-    ["× weight", (i) => (i < 12 ? 13 - i : "")],
-    ["product", (i) => (i < 12 ? Number(d[i]) * (13 - i) : "")],
+    ["หลัก", (i) => (i < 12 ? d[i] : d[12] ?? "?")],
+    ["× ตัวคูณ", (i) => (i < 12 ? 13 - i : "")],
+    ["ผลคูณ", (i) => (i < 12 ? Number(d[i]) * (13 - i) : "")],
   ];
   rows.forEach(([label, fn], r) => {
     const last = r === rows.length - 1 ? " last" : "";
@@ -39,7 +39,7 @@ function checkDigitWorking(d) {
     if (i) steps.append(el("br"));
     steps.append(text, el("b", { textContent: String(b) }));
   });
-  return [el("h3", { textContent: "Check digit calculation" }), grid, steps];
+  return [el("h3", { textContent: "วิธีคำนวณ check digit" }), grid, steps];
 }
 
 const EXPLAIN = {
@@ -57,7 +57,7 @@ const EXPLAIN = {
   custom: ({ data }) => {
     if (!data?.matches?.length) return [];
     const groupCount = Math.max(0, ...data.matches.map((m) => m.groups.length));
-    const headers = ["#", "match", "ตำแหน่ง", ...Array.from({ length: groupCount }, (_, i) => `$${i + 1}`)];
+    const headers = ["#", "ส่วนที่ตรง", "ตำแหน่ง", ...Array.from({ length: groupCount }, (_, i) => `$${i + 1}`)];
     return [table(headers, data.matches.map((m, i) => [String(i + 1), m.text, `${m.start}–${m.end}`, ...m.groups.map((g) => g ?? "—")]))];
   },
 };

@@ -34,13 +34,13 @@ export function toast(msg) {
   toastTimer = setTimeout(() => t.classList.remove("show"), 1400);
 }
 
-export async function copy(text, done = "Copied") {
+export async function copy(text, done = "คัดลอกแล้ว") {
   try {
     await navigator.clipboard.writeText(text);
     toast(done);
     return true;
   } catch {
-    toast("Copy ไม่สำเร็จ ลอง select ข้อความแล้วกด Ctrl+C");
+    toast("คัดลอกไม่สำเร็จ ลองเลือกข้อความแล้วกด Ctrl+C");
     return false;
   }
 }

@@ -72,7 +72,7 @@ test("custom regex: find mode highlights every match with the g flag", () => {
   const r = customRule(String.raw`\d+`, "g", { fullMatch: false });
   const res = r.test("a1 b22 c333");
   assert.deepEqual(res.spans, [[1, 2], [4, 6], [8, 11]]);
-  assert.equal(res.reason, "3 matches");
+  assert.equal(res.reason, "ตรง 3 จุด");
 });
 
 test("custom regex: zero-length matches count as a match", () => {

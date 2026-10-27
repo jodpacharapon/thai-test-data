@@ -21,7 +21,7 @@ export function initGenerator() {
     const count = clampCount($("count").value);
     $("count").value = count;
     const rows = generateRows(current, settings[current.key], { count, seed: readSeed(), unique: $("unique").checked });
-    $("shortfall").textContent = rows.length < count ? `unique ได้แค่ ${fmt(rows.length)} จาก ${fmt(count)}` : "";
+    $("shortfall").textContent = rows.length < count ? `ค่าไม่ซ้ำมีแค่ ${fmt(rows.length)} จาก ${fmt(count)}` : "";
     results.setRows(rows);
   }
 
