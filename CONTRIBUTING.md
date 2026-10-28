@@ -73,7 +73,7 @@ Release อัตโนมัติด้วย GitHub Actions ([`release.yml`](
 
 Workflow จะรัน test และ build แล้วสร้าง tag `vX.Y.Z` กับ GitHub Release โดยใช้ section นั้นใน CHANGELOG เป็น release notes
 ถ้าแก้ section ของ version ที่ release ไปแล้ว release notes บน GitHub จะอัปเดตตามให้เองตอน push เข้า `main`
-ถ้า repo มี secret `NPM_TOKEN` จะ publish ขึ้น npm (พร้อม provenance) ให้ด้วย version ที่ release ไปแล้วจะถูกข้าม
+แล้ว publish ขึ้น npm (พร้อม provenance) ให้ด้วย ผ่าน Trusted Publishing ที่ตั้งไว้บน npmjs.com ไม่ต้องใช้ token ส่วน version ที่ release ไปแล้วจะถูกข้าม
 
 ## License
 

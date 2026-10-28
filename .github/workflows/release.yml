@@ -1,7 +1,8 @@
 name: Release
 
 # Bump packages/thai-test-data/package.json and add a CHANGELOG section, then push to main.
-# This creates the vX.Y.Z tag and GitHub release, and publishes to npm when NPM_TOKEN is set.
+# This creates the vX.Y.Z tag and GitHub release, and publishes to npm with Trusted Publishing
+# (npmjs.com trusts this workflow through OIDC, so there is no npm token to store or renew).
 # Already-released versions are skipped, so every push to main is safe. Release notes of past
 # versions are kept in step with their CHANGELOG sections, so editing CHANGELOG.md updates them.
 
@@ -22,8 +23,6 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-    env:
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -34,6 +33,10 @@ jobs:
           node-version: 22
           cache: npm
           registry-url: https://registry.npmjs.org
+
+      # Trusted Publishing needs npm 11.5.1 or later; Node 22 ships with npm 10.
+      - name: Update npm
+        run: npm install -g npm@^11.5.1
 
       - name: Check what needs releasing
         id: plan
@@ -47,7 +50,7 @@ jobs:
             echo "github=true" >> "$GITHUB_OUTPUT"
           fi
 
-          if [ -n "$NPM_TOKEN" ] && ! npm view "thai-test-data@$version" version >/dev/null 2>&1; then
+          if ! npm view "thai-test-data@$version" version >/dev/null 2>&1; then
             echo "npm=true" >> "$GITHUB_OUTPUT"
           else
             echo "npm=false" >> "$GITHUB_OUTPUT"
@@ -57,7 +60,7 @@ jobs:
         run: |
           echo "Version: ${{ steps.plan.outputs.version }}"
           echo "Create GitHub release: ${{ steps.plan.outputs.github }}"
-          echo "Publish to npm: ${{ steps.plan.outputs.npm }} (needs the NPM_TOKEN secret)"
+          echo "Publish to npm: ${{ steps.plan.outputs.npm }}"
 
       - name: Install, test and build
         if: steps.plan.outputs.github == 'true' || steps.plan.outputs.npm == 'true'
@@ -78,8 +81,6 @@ jobs:
 
       - name: Publish to npm
         if: steps.plan.outputs.npm == 'true'
-        env:
-          NODE_AUTH_TOKEN: ${{ env.NPM_TOKEN }}
         run: npm publish -w thai-test-data --provenance --access public
 
       - name: Sync notes of past releases with CHANGELOG
